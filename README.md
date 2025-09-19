@@ -2,9 +2,27 @@
 
 T3 Stack app for querying the PokeAPI.
 
+## Prerequisites
+You need to create an ".env" file in the root of the project. You can use this content as a template:
+
+```ini
+# Next Auth
+# You can generate a new secret on the command line with:
+# npx auth secret
+# https://next-auth.js.org/configuration/options#secret
+AUTH_SECRET="topsecretpassword"
+# Next Auth Discord Provider
+AUTH_DISCORD_ID=""
+AUTH_DISCORD_SECRET=""
+
+# Prisma
+# https://www.prisma.io/docs/reference/database-reference/connection-urls#env
+DATABASE_URL="postgresql://postgres:password@localhost:5432/poketest"
+```
+
 ## How to execute locally
 
-The project uses pnpm. To install dependencies in local
+The project uses pnpm, but you can use npm or yarn, depending on your setup. To install dependencies in local
 ```bash
 pnpm install
 ```
