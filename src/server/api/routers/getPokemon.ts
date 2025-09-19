@@ -1,0 +1,410 @@
+import { z } from "zod";
+import Pokedex from "pokedex-promise-v2";
+
+import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+
+const pokedexInstance = new Pokedex();
+
+type EvolutionChainLink = {
+  species: { name: string; url: string };
+  evolves_to: EvolutionChainLink[];
+};
+
+const extractEvolutionDetails = async (
+  chainLink: EvolutionChainLink,
+): Promise<{ id: number; name: string; image: string }[]> => {
+  const pokemonName = chainLink.species.name;
+  const pokemonData = await pokedexInstance.getPokemonByName(pokemonName);
+  const imageUrl = pokemonData.sprites?.front_default ?? "";
+  const pokemonId = pokemonData.id;
+
+  let details = [{ id: pokemonId, name: pokemonName, image: imageUrl }];
+
+  for (const evolution of chainLink.evolves_to) {
+    details = details.concat(await extractEvolutionDetails(evolution));
+  }
+  return details;
+};
+
+const getEvolutions = async (
+  species: Pokedex.PokemonSpecies,
+): Promise<{ id: number; name: string; image: string }[] | undefined> => {
+  let evolutionChainData: { id: number; name: string; image: string }[] = [];
+  if (species.evolution_chain?.url) {
+    try {
+      const evolutionChainUrl: string = species.evolution_chain.url;
+      const evolutionChainIdRegExp = /\/(\d+)\//;
+      const evolutionChainIdMatch =
+        evolutionChainIdRegExp.exec(evolutionChainUrl);
+      const evolutionChainId = evolutionChainIdMatch
+        ? evolutionChainIdMatch[1]
+        : null;
+      if (evolutionChainId) {
+        const evolutionChain = await pokedexInstance.getEvolutionChainById(
+          Number(evolutionChainId),
+        );
+
+        evolutionChainData = await extractEvolutionDetails(
+          evolutionChain.chain,
+        );
+        return evolutionChainData;
+      }
+    } catch (error) {
+      console.error("Error fetching evolution chain for detail page:", error);
+    }
+  }
+};
+
+const getCandidatePokemons = async (
+  inputSearch: string | undefined,
+  inputGeneration: Array<string> | undefined,
+  inputLimit: number | undefined,
+  inputOffset: number | undefined,
+  inputTypes: Array<string> | undefined,
+): Promise<{ allPokemonNames: string[]; count: number }> => {
+  let allPokemonNames: string[] = [];
+  let count = 0;
+  //If generation, we obtain the names directly from the generations
+  if (inputGeneration) {
+    const generationData =
+      await pokedexInstance.getGenerationByName(inputGeneration);
+    const pokemonNamesFromGenerations = generationData
+      .map((currentGeneration) =>
+        currentGeneration.pokemon_species.map((species) => species.name),
+      )
+      .flat();
+    count = pokemonNamesFromGenerations.length;
+    if (!inputSearch) {
+      const limit = inputLimit ?? 30;
+      const offset = inputOffset ?? 0;
+      allPokemonNames = pokemonNamesFromGenerations;
+      allPokemonNames = pokemonNamesFromGenerations.slice(
+        offset,
+        offset + limit,
+      );
+    } else {
+      allPokemonNames = pokemonNamesFromGenerations;
+    }
+  } else {
+    //If no generation, we obtain directly the names
+    const allPokemonNamesResponse = await pokedexInstance.getPokemonsList({
+      limit: !inputSearch && !inputTypes ? inputLimit : 3000,
+      offset: !inputSearch && !inputTypes ? inputOffset : 0,
+    });
+    allPokemonNames = allPokemonNamesResponse.results.map(
+      (pokemon) => pokemon.name,
+    );
+    count = allPokemonNamesResponse.count;
+  }
+  if (inputTypes) {
+    const pokemonsByType = (
+      await pokedexInstance.getTypeByName(inputTypes)
+    ).flatMap((pokemonType) =>
+      pokemonType.pokemon.map((pokemon) => pokemon.pokemon.name),
+    );
+    const setB = new Set(pokemonsByType);
+    const nuevaLista = allPokemonNames.filter((item) => setB.has(item));
+    allPokemonNames = structuredClone(nuevaLista);
+  }
+  return { allPokemonNames, count };
+};
+
+export const pokemonRouter = createTRPCRouter({
+  pokemonList: publicProcedure
+    .input(
+      z.object({
+        search: z.string().optional(),
+        language: z.string().optional(),
+        types: z.array(z.string()).optional(),
+        generation: z.array(z.string()).optional(),
+        limit: z.number().optional(),
+        offset: z.number().optional(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const lang = input.language ?? "es";
+      const candidatesObject = await getCandidatePokemons(
+        input.search,
+        input.generation,
+        input.limit,
+        input.offset,
+        input.types,
+      );
+      let allPokemonNames = candidatesObject.allPokemonNames;
+      const count = candidatesObject.count;
+
+      // Filtering by search term
+      let filteredPokemonNames: Set<string> = new Set<string>();
+      if (input.search) {
+        const searchTerm = input.search.toLowerCase();
+        allPokemonNames = allPokemonNames.filter((name) =>
+          name.includes(searchTerm),
+        );
+        filteredPokemonNames = new Set(structuredClone(allPokemonNames));
+        for (const pokemon of allPokemonNames) {
+          try {
+            const species: Pokedex.PokemonSpecies =
+              await pokedexInstance.getPokemonSpeciesByName(pokemon);
+            const evolutions = await getEvolutions(species);
+            if (evolutions) {
+              for (const evolution of evolutions) {
+                if (evolution.name == pokemon) continue;
+                filteredPokemonNames.add(evolution.name);
+              }
+            }
+          } catch (error) {
+            console.error("Pokemon not found: ", pokemon, error);
+            filteredPokemonNames.delete(pokemon);
+          }
+        }
+        allPokemonNames = Array.from(filteredPokemonNames);
+      }
+
+      // Fetch all pokemon data. Some names can't be found on the API for some reason. We obtain only promises fulfilled and discard the rest to return data
+      let allPokemonsData = await getAllPokemonData(allPokemonNames);
+
+      //Filtering by types
+      if (input.types && input.types.length > 0) {
+        allPokemonsData = allPokemonsData.filter((pokemon) => {
+          const hasMatchingType = pokemon.types.some((typeInfo) =>
+            input.types?.includes(typeInfo.type.name),
+          );
+          return hasMatchingType;
+        });
+      }
+
+      // Apply pagination (limit and offset)
+      const limit = input.limit ?? 30;
+      const offset = input.offset ?? 0;
+      let paginatedPokemons: Pokedex.Pokemon[] = [];
+      if (input.search) {
+        paginatedPokemons = allPokemonsData.slice(offset, offset + limit);
+      } else {
+        paginatedPokemons = structuredClone(allPokemonsData);
+      }
+
+      // Obtain the generation and types in a specific language for every Pokemon
+      const enrichedPokemons = await Promise.all(
+        paginatedPokemons
+          .filter((pokemon) => pokemon.name === pokemon.species.name)
+          .map(async (pokemon: Pokedex.Pokemon) => {
+            const speciesNameForGeneration = pokemon.name.includes("-mega")
+              ? pokemon.name.split("-mega")[0]
+              : pokemon.name;
+            const species = await pokedexInstance.getPokemonSpeciesByName(
+              speciesNameForGeneration!,
+            );
+            const generationData = await pokedexInstance.getGenerationByName(
+              species.generation.name,
+            );
+            const translatedGenerationName = generationData.names?.find(
+              (g) => g.language.name === lang,
+            )?.name;
+            const generation =
+              translatedGenerationName ?? species.generation?.name ?? "?";
+
+            // Obtiene los tipos en español
+            const types = await Promise.all(
+              pokemon.types.map(async (typeInfo: Pokedex.PokemonType) => {
+                const typeData = await pokedexInstance.getTypeByName(
+                  typeInfo.type.name,
+                );
+                type TypeName = { language: { name: string }; name: string };
+                const typeNameEs =
+                  typeData.names?.find(
+                    (n: TypeName) => n.language.name === lang,
+                  )?.name ?? typeInfo.type.name;
+                return typeNameEs;
+              }),
+            );
+
+            // Obtain the Pokemon name in a given lang (PokeAPI seems to have structured the data this way)
+            type SpeciesName = { language: { name: string }; name: string };
+            const nameEs =
+              (species.names as SpeciesName[] | undefined)?.find(
+                (n) => n.language.name === lang,
+              )?.name ?? pokemon.name;
+
+            return {
+              id: pokemon.id,
+              name: nameEs,
+              generation,
+              types,
+              image: pokemon.sprites?.front_default ?? "",
+            };
+          }),
+      );
+
+      const result = {
+        pokemonList: enrichedPokemons.sort((a, b) => (a.id ?? 0) - (b.id ?? 0)),
+        count,
+        hasMore: enrichedPokemons?.length >= limit && offset + limit < count,
+      };
+
+      // console.log("result", result);
+      return result;
+    }),
+  pokemonById: publicProcedure
+    .input(
+      z.object({
+        id: z.union([z.number(), z.string()]),
+        language: z.string().optional(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const lang = input.language ?? "es";
+      let pokemon: Pokedex.Pokemon;
+      let species: Pokedex.PokemonSpecies;
+
+      try {
+        pokemon = await pokedexInstance.getPokemonByName(input.id);
+        species = await pokedexInstance.getPokemonSpeciesByName(pokemon.name);
+      } catch (error) {
+        console.error("Error fetching Pokémon:", error);
+        throw new Error(`Failed to fetch Pokémon: ${input.id}`);
+      }
+
+      const generationData = await pokedexInstance.getGenerationByName(
+        species.generation.name,
+      );
+      const translatedGenerationName = generationData.names?.find(
+        (g) => g.language.name === lang,
+      )?.name;
+      const generation =
+        translatedGenerationName ?? species.generation?.name ?? "?";
+
+      const types = await Promise.all(
+        pokemon.types.map(async (typeInfo: Pokedex.PokemonType) => {
+          const typeData = await pokedexInstance.getTypeByName(
+            typeInfo.type.name,
+          );
+          type TypeName = { language: { name: string }; name: string };
+          const typeNameEs =
+            typeData.names?.find((n: TypeName) => n.language.name === lang)
+              ?.name ?? typeInfo.type.name;
+          return typeNameEs;
+        }),
+      );
+
+      type SpeciesName = { language: { name: string }; name: string };
+      const nameEs =
+        (species.names as SpeciesName[] | undefined)?.find(
+          (n) => n.language.name === lang,
+        )?.name ?? pokemon.name;
+
+      const flavorTextEntry =
+        species.flavor_text_entries?.find(
+          (entry: Pokedex.FlavorText) =>
+            entry.language.name === lang &&
+            ((entry.version as Pokedex.NamedAPIResource)?.name === "scarlet" ||
+              (entry.version as Pokedex.NamedAPIResource)?.name === "violet"),
+        ) ??
+        species.flavor_text_entries?.find(
+          (entry: Pokedex.FlavorText) => entry.language.name === lang,
+        ) ??
+        species.flavor_text_entries?.find(
+          (entry: Pokedex.FlavorText) => entry.language.name === "en",
+        );
+
+      const description = flavorTextEntry
+        ? flavorTextEntry.flavor_text.replace(/\n/g, " ")
+        : "No description available.";
+
+      const translatedStats = await Promise.all(
+        pokemon.stats.map(async (stat: Pokedex.StatElement) => {
+          const statData = await pokedexInstance.getStatByName(stat.stat.name);
+          type StatName = { language: { name: string }; name: string };
+          const translatedStatName =
+            statData.names?.find((n: StatName) => n.language.name === lang)
+              ?.name ?? stat.stat.name;
+          return {
+            stat: {
+              originalName: stat.stat.name,
+              translatedName: translatedStatName,
+            },
+            value: stat.base_stat ?? 0,
+          };
+        }),
+      );
+
+      const evolutionChainData: unknown = await getEvolutions(species);
+
+      return {
+        stats: translatedStats,
+        id: pokemon.id,
+        name: nameEs,
+        generation,
+        types,
+        image: pokemon.sprites?.front_default ?? "",
+        cries: pokemon.cries,
+        description,
+        evolutionChain: evolutionChainData,
+      };
+    }),
+  getPokemonTypes: publicProcedure
+    .input(z.object({ language: z.string().optional() }))
+    .query(async ({ input }) => {
+      const lang = input.language ?? "es";
+      const allTypes = await pokedexInstance.getTypesList();
+
+      const translatedTypes = await Promise.all(
+        allTypes.results.map(async (typeInfo: Pokedex.NamedAPIResource) => {
+          const typeData = await pokedexInstance.getTypeByName(typeInfo.name);
+          type TypeName = { language: { name: string }; name: string };
+          const translatedName =
+            typeData.names?.find((n: TypeName) => n.language.name === lang)
+              ?.name ?? typeInfo.name;
+          return {
+            originalName: typeInfo.name,
+            translatedName: translatedName,
+          };
+        }),
+      );
+      return translatedTypes;
+    }),
+  getPokemonGenerations: publicProcedure
+    .input(z.object({ language: z.string().optional() }))
+    .query(async ({ input }) => {
+      const lang = input.language ?? "es";
+      const allGenerations = await pokedexInstance.getGenerationsList();
+      const translatedGenerations = await Promise.all(
+        allGenerations.results.map(
+          async (genInfo: Pokedex.NamedAPIResource) => {
+            const generationData: Pokedex.Generation =
+              await pokedexInstance.getGenerationByName(genInfo.name);
+            type GenerationName = { language: { name: string }; name: string };
+            const translatedName =
+              generationData.names?.find(
+                (n: GenerationName) => n.language.name === lang,
+              )?.name ?? genInfo.name;
+            const generationNumber =
+              parseInt(genInfo.name.split("-")[1] ?? "0") || 0;
+            return {
+              originalName: genInfo.name,
+              translatedName: translatedName,
+              generationNumber: generationNumber,
+            };
+          },
+        ),
+      );
+      return translatedGenerations.sort(
+        (a, b) => a.generationNumber - b.generationNumber,
+      );
+    }),
+});
+async function getAllPokemonData(allPokemonNames: string[]) {
+  let allPokemonsData: Pokedex.Pokemon[] = [];
+  if (allPokemonNames.length > 0) {
+    const results = await Promise.allSettled(
+      allPokemonNames.map((name) => pokedexInstance.getPokemonByName(name)),
+    );
+    const allFetchedPokemons = results
+      .filter(
+        (result): result is PromiseFulfilledResult<Pokedex.Pokemon> =>
+          result.status === "fulfilled",
+      )
+      .map((result) => result.value);
+    allPokemonsData = structuredClone(allFetchedPokemons);
+  }
+  return allPokemonsData;
+}

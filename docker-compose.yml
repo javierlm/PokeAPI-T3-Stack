@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: poketest-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: poketest
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - poketest-network
+
+  # Next.js Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: poketest-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/poketest
+      - AUTH_SECRET=djk2HMJTL/4vwb4efRRVxBm2CDh5vA78cGrcncsqIew=
+      - AUTH_DISCORD_ID=your-discord-id-here
+      - AUTH_DISCORD_SECRET=your-discord-secret-here
+      - SKIP_ENV_VALIDATION=true
+    depends_on:
+      - postgres
+    networks:
+      - poketest-network
+    command: >
+      sh -c "
+        echo 'Waiting for postgres...' &&
+        while ! nc -z postgres 5432; do
+          sleep 1
+        done &&
+        echo 'PostgreSQL started' &&
+        node server.js
+      "
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  poketest-network:
+    driver: bridge

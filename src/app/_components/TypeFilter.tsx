@@ -1,0 +1,115 @@
+import { typeColors } from "@/lib/constants";
+import { api } from "@/trpc/react";
+import { useLanguage } from "@/context/LanguageContext";
+
+interface TypeFilterProps {
+  isOpen: boolean;
+  onToggle: () => void;
+  selectedTypes: string[];
+  onTypeChange: (types: string[]) => void;
+}
+
+export function TypeFilter({
+  isOpen,
+  onToggle,
+  selectedTypes,
+  onTypeChange,
+}: TypeFilterProps) {
+  const { selectedLang } = useLanguage();
+  const { data: typesData } = api.pokemon.getPokemonTypes.useQuery({
+    language: selectedLang,
+  });
+
+  const handleSelect = (type: string) => {
+    let updatedTypes: string[];
+    if (selectedTypes.includes(type)) {
+      updatedTypes = selectedTypes.filter((t) => t !== type);
+    } else {
+      updatedTypes = [...selectedTypes, type];
+    }
+    onTypeChange(updatedTypes);
+  };
+
+  const handleClearAll = () => {
+    onTypeChange([]);
+    onToggle();
+  };
+
+  const displaySelectedTypes =
+    selectedTypes.length > 0
+      ? selectedTypes
+          .map((type) => {
+            const typeInfo = typesData?.find((t) => t.originalName === type);
+            return typeInfo ? typeInfo.translatedName : type;
+          })
+          .join(", ")
+      : "Tipo";
+
+  return (
+    <div className="relative inline-block text-left">
+      <div>
+        <button
+          type="button"
+          className="inline-flex justify-center rounded-full border-2 border-gray-300 bg-white px-4 py-3 text-base font-medium text-gray-600 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none"
+          onClick={onToggle}
+        >
+          {displaySelectedTypes}
+          <svg
+            className="-mr-1 ml-2 h-5 w-5"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              fillRule="evenodd"
+              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
+
+      {isOpen && (
+        <div className="ring-opacity-5 absolute right-0 z-10 mt-2 max-h-60 w-32 origin-top-right overflow-y-auto rounded-md bg-white shadow-lg ring-1 ring-black focus:outline-none">
+          <div
+            className="flex flex-col items-center py-1"
+            role="menu"
+            aria-orientation="vertical"
+            aria-labelledby="options-menu"
+          >
+            <button
+              onClick={handleClearAll}
+              className="block w-full px-2 py-2 text-center hover:bg-gray-100"
+              role="menuitem"
+            >
+              <span className="rounded-full border border-white/30 bg-gray-200 px-2 py-1 text-xs font-bold text-gray-800 shadow">
+                Limpiar
+              </span>
+            </button>
+            {typesData?.map((type) => {
+              const isSelected = selectedTypes.includes(type.originalName);
+              const colorClass =
+                typeColors[type.originalName.toLowerCase()] ??
+                "bg-gray-200 text-gray-800";
+              return (
+                <button
+                  key={type.originalName}
+                  onClick={() => handleSelect(type.originalName)}
+                  className={`block w-full px-2 py-2 text-center hover:bg-gray-100 ${isSelected ? "bg-blue-50" : ""}`}
+                  role="menuitem"
+                >
+                  <span
+                    className={`rounded-full border border-white/30 px-2 py-1 text-xs font-bold shadow ${colorClass}`}
+                  >
+                    {type.translatedName} {isSelected && "✓"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
