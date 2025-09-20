@@ -113,18 +113,18 @@ function HomeContent() {
           />
         </div>
       </Suspense>
-      <div className="mt-8 w-full px-4">
+      <div className="mx-auto mt-8 w-full max-w-7xl px-4">
         <BackToTopButton />
         {isFetching && offset === 0 ? (
           <LoadingPokeball />
         ) : isError ? (
           <p className="text-lg text-red-500">Error al cargar los Pokémon.</p>
         ) : pokemons.length > 0 ? (
-          <div className="flex flex-wrap justify-center gap-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {pokemons.map((pokemon: Pokemon) => (
               <div
                 key={pokemon.id}
-                className="flex w-full justify-center sm:w-1/2 md:w-1/4"
+                className="flex w-full justify-center"
               >
                 <PokemonResultCard
                   pokemon={pokemon}
