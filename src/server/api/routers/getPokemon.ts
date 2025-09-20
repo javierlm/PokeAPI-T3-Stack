@@ -124,30 +124,60 @@ export const pokemonRouter = createTRPCRouter({
       const count = candidatesObject.count;
 
       // Filtering by search term
-      let filteredPokemonNames: Set<string> = new Set<string>();
       if (input.search) {
         const searchTerm = input.search.toLowerCase();
-        allPokemonNames = allPokemonNames.filter((name) =>
+        const matchingPokemonNames = allPokemonNames.filter((name) =>
           name.includes(searchTerm),
         );
-        filteredPokemonNames = new Set(structuredClone(allPokemonNames));
-        for (const pokemon of allPokemonNames) {
-          try {
-            const species: Pokedex.PokemonSpecies =
-              await pokedexInstance.getPokemonSpeciesByName(pokemon);
-            const evolutions = await getEvolutions(species);
-            if (evolutions) {
-              for (const evolution of evolutions) {
-                if (evolution.name == pokemon) continue;
-                filteredPokemonNames.add(evolution.name);
+
+        const speciesResults = await Promise.allSettled(
+          matchingPokemonNames.map((name) =>
+            pokedexInstance.getPokemonSpeciesByName(name),
+          ),
+        );
+
+        const evolutionChainUrls = new Set(
+          speciesResults
+            .filter(
+              (
+                result,
+              ): result is PromiseFulfilledResult<Pokedex.PokemonSpecies> =>
+                result.status === "fulfilled" &&
+                !!result.value.evolution_chain?.url,
+            )
+            .map((result) => result.value.evolution_chain.url),
+        );
+
+        const allEvolutionPokemonNames = new Set<string>(matchingPokemonNames);
+
+        const evolutionChainPromises = Array.from(evolutionChainUrls).map(
+          async (url) => {
+            try {
+              const evolutionChainIdMatch = /\/(\d+)\//.exec(url);
+              const evolutionChainId = evolutionChainIdMatch
+                ? evolutionChainIdMatch[1]
+                : null;
+              if (evolutionChainId) {
+                const evolutionChain =
+                  await pokedexInstance.getEvolutionChainById(
+                    Number(evolutionChainId),
+                  );
+                const evolutionDetails = await extractEvolutionDetails(
+                  evolutionChain.chain,
+                );
+                evolutionDetails.forEach((p) =>
+                  allEvolutionPokemonNames.add(p.name),
+                );
               }
+            } catch (error) {
+              console.error(`Failed to fetch evolution chain ${url}`, error);
             }
-          } catch (error) {
-            console.error("Pokemon not found: ", pokemon, error);
-            filteredPokemonNames.delete(pokemon);
-          }
-        }
-        allPokemonNames = Array.from(filteredPokemonNames);
+          },
+        );
+
+        await Promise.all(evolutionChainPromises);
+
+        allPokemonNames = Array.from(allEvolutionPokemonNames);
       }
 
       // Fetch all pokemon data. Some names can't be found on the API for some reason. We obtain only promises fulfilled and discard the rest to return data
