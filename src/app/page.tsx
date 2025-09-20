@@ -125,24 +125,30 @@ function HomeContent() {
               </div>
             ))}
           </div>
-        ) : (
+        ) : data && data.pokemonList.length === 0 ? (
           <div className="mt-8 flex flex-col items-center justify-center gap-4">
             <Frown className="text-muted-foreground h-24 w-24" />
             <p className="text-foreground text-lg">
               No se encontraron Pokémon.
             </p>
           </div>
-        )}
+        ) : null}
       </div>
       <div className="flex w-full justify-center">
         {hasMore && pokemons.length > 0 && (
           <button
             onClick={handleLoadMore}
-            className="mt-12 flex cursor-pointer items-center gap-2 rounded-full bg-blue-800 px-10 py-3 font-semibold text-white no-underline transition hover:bg-blue-700"
+            className="mt-12 flex h-[50px] w-[200px] cursor-pointer items-center justify-center gap-2 rounded-full bg-blue-800 px-10 py-3 font-semibold text-white no-underline transition hover:bg-blue-700"
             disabled={isLoading}
           >
-            {isLoading ? "Cargando..." : "Cargar más"}
-            {!isLoading && <ArrowDown size={20} />}
+            {isLoading ? (
+              "Cargando..."
+            ) : (
+              <>
+                {"Cargar más"}
+                <ArrowDown size={20} />
+              </>
+            )}
           </button>
         )}
       </div>
