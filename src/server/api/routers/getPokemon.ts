@@ -74,17 +74,7 @@ const getCandidatePokemons = async (
       )
       .flat();
     count = pokemonNamesFromGenerations.length;
-    if (!inputSearch) {
-      const limit = inputLimit ?? 30;
-      const offset = inputOffset ?? 0;
-      allPokemonNames = pokemonNamesFromGenerations;
-      allPokemonNames = pokemonNamesFromGenerations.slice(
-        offset,
-        offset + limit,
-      );
-    } else {
-      allPokemonNames = pokemonNamesFromGenerations;
-    }
+    allPokemonNames = pokemonNamesFromGenerations;
   } else {
     //If no generation, we obtain directly the names
     const allPokemonNamesResponse = await pokedexInstance.getPokemonsList({
@@ -173,19 +163,9 @@ export const pokemonRouter = createTRPCRouter({
         });
       }
 
-      // Apply pagination (limit and offset)
-      const limit = input.limit ?? 30;
-      const offset = input.offset ?? 0;
-      let paginatedPokemons: Pokedex.Pokemon[] = [];
-      if (input.search) {
-        paginatedPokemons = allPokemonsData.slice(offset, offset + limit);
-      } else {
-        paginatedPokemons = structuredClone(allPokemonsData);
-      }
-
       // Obtain the generation and types in a specific language for every Pokemon
       const enrichedPokemons = await Promise.all(
-        paginatedPokemons
+        allPokemonsData
           .filter((pokemon) => pokemon.name === pokemon.species.name)
           .map(async (pokemon: Pokedex.Pokemon) => {
             const speciesNameForGeneration = pokemon.name.includes("-mega")
@@ -235,10 +215,15 @@ export const pokemonRouter = createTRPCRouter({
           }),
       );
 
+      enrichedPokemons.sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
+
+      const limit = input.limit ?? 30;
+      const offset = input.offset ?? 0;
+      const paginatedPokemons = enrichedPokemons.slice(offset, offset + limit);
       const result = {
-        pokemonList: enrichedPokemons.sort((a, b) => (a.id ?? 0) - (b.id ?? 0)),
+        pokemonList: paginatedPokemons,
         count,
-        hasMore: enrichedPokemons?.length >= limit && offset + limit < count,
+        hasMore: paginatedPokemons?.length >= limit && offset + limit < count,
       };
 
       // console.log("result", result);
