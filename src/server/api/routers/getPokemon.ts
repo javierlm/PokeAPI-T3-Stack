@@ -32,23 +32,12 @@ const getEvolutions = async (
   let evolutionChainData: { id: number; name: string; image: string }[] = [];
   if (species.evolution_chain?.url) {
     try {
-      const evolutionChainUrl: string = species.evolution_chain.url;
-      const evolutionChainIdRegExp = /\/(\d+)\//;
-      const evolutionChainIdMatch =
-        evolutionChainIdRegExp.exec(evolutionChainUrl);
-      const evolutionChainId = evolutionChainIdMatch
-        ? evolutionChainIdMatch[1]
-        : null;
-      if (evolutionChainId) {
-        const evolutionChain = await pokedexInstance.getEvolutionChainById(
-          Number(evolutionChainId),
-        );
+      const evolutionChain = (await pokedexInstance.getResource(
+        species.evolution_chain.url,
+      )) as Pokedex.EvolutionChain;
 
-        evolutionChainData = await extractEvolutionDetails(
-          evolutionChain.chain,
-        );
-        return evolutionChainData;
-      }
+      evolutionChainData = await extractEvolutionDetails(evolutionChain.chain);
+      return evolutionChainData;
     } catch (error) {
       console.error("Error fetching evolution chain for detail page:", error);
     }
@@ -153,22 +142,15 @@ export const pokemonRouter = createTRPCRouter({
         const evolutionChainPromises = Array.from(evolutionChainUrls).map(
           async (url) => {
             try {
-              const evolutionChainIdMatch = /\/(\d+)\//.exec(url);
-              const evolutionChainId = evolutionChainIdMatch
-                ? evolutionChainIdMatch[1]
-                : null;
-              if (evolutionChainId) {
-                const evolutionChain =
-                  await pokedexInstance.getEvolutionChainById(
-                    Number(evolutionChainId),
-                  );
-                const evolutionDetails = await extractEvolutionDetails(
-                  evolutionChain.chain,
-                );
-                evolutionDetails.forEach((p) =>
-                  allEvolutionPokemonNames.add(p.name),
-                );
-              }
+              const evolutionChain = (await pokedexInstance.getResource(
+                url,
+              )) as Pokedex.EvolutionChain;
+              const evolutionDetails = await extractEvolutionDetails(
+                evolutionChain.chain,
+              );
+              evolutionDetails.forEach((p) =>
+                allEvolutionPokemonNames.add(p.name),
+              );
             } catch (error) {
               console.error(`Failed to fetch evolution chain ${url}`, error);
             }
