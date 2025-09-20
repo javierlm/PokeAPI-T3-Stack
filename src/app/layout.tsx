@@ -5,8 +5,9 @@ import { Geist } from "next/font/google";
 
 import { TRPCReactProvider } from "@/trpc/react";
 import Navbar from "./_components/Navbar";
-import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { LoadingProvider } from "@/context/LoadingContext";
+import { ClientThemeProvider } from "./_components/ClientThemeProvider";
 
 export const metadata: Metadata = {
   title: "PokeAPI App",
@@ -29,22 +30,24 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="bg-background text-foreground h-full">
-        <NextThemesProvider
+        <ClientThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
         >
           <TRPCReactProvider>
             <LanguageProvider>
-              <div className="flex h-full flex-col">
-                <Navbar />
-                <main id="main-scroll" className="flex-grow overflow-y-auto">
-                  {children}
-                </main>
-              </div>
+              <LoadingProvider>
+                <div className="flex h-full flex-col">
+                  <Navbar />
+                  <main id="main-scroll" className="flex-grow overflow-y-auto">
+                    {children}
+                  </main>
+                </div>
+              </LoadingProvider>
             </LanguageProvider>
           </TRPCReactProvider>
-        </NextThemesProvider>
+        </ClientThemeProvider>
       </body>
     </html>
   );

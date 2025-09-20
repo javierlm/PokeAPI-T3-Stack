@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { typeColors } from "@/lib/constants";
+import { useLoading } from "@/context/LoadingContext";
 export type PokemonType = string | { name: string };
 
 export type Pokemon = {
@@ -24,9 +25,11 @@ const PokemonResultCard = React.memo(function PokemonResultCard({
   const searchParamsString = currentSearchParams
     ? currentSearchParams.toString()
     : "";
+  const { startLoading } = useLoading();
+
   const detailHref = `/pokemon/${pokemon.id}?lang=${selectedLang}${searchParamsString ? `&${searchParamsString}` : ""}`;
   return (
-    <Link href={detailHref} className="block">
+    <Link href={detailHref} className="block" onClick={startLoading}>
       <div className="border-border text-foreground flex w-full max-w-md flex-col gap-3 rounded-xl border-2 p-6 shadow-xl transition-transform duration-500 hover:scale-105">
         {pokemon.image && (
           <Image

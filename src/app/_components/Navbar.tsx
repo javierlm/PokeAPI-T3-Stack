@@ -9,8 +9,10 @@ export default function Navbar() {
   const { selectedLang, setSelectedLang } = useLanguage();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const langSelectorRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false); // New state for client-side rendering
 
   useEffect(() => {
+    setMounted(true);
     const handleClickOutside = (event: MouseEvent) => {
       if (
         langSelectorRef.current &&
@@ -95,10 +97,14 @@ export default function Navbar() {
           className="rounded-full p-2 transition-all hover:scale-110 hover:bg-gray-100 dark:hover:bg-gray-800"
           aria-label="Toggle theme"
         >
-          {resolvedTheme === "dark" ? (
-            <Moon className="h-6 w-6 stroke-white stroke-2" />
+          {mounted ? (
+            resolvedTheme === "dark" ? (
+              <Moon className="h-6 w-6 stroke-white stroke-2" />
+            ) : (
+              <Sun className="h-6 w-6 text-yellow-500" />
+            )
           ) : (
-            <Sun className="h-6 w-6 text-yellow-500" />
+            <div className="h-6 w-6" />
           )}
         </button>
       </div>

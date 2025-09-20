@@ -15,16 +15,22 @@ import { useSearchParams } from "next/navigation";
 function HomeContent() {
   const { selectedLang } = useLanguage();
   const searchParams = useSearchParams();
+  const [isInitialised, setIsInitialised] = useState(false);
 
-  const [searchTerm, setSearchTerm] = useState(
-    () => searchParams.get("search") ?? "",
-  );
-  const [selectedTypes, setSelectedTypes] = useState<string[]>(
-    () => searchParams.get("type")?.split(",").filter(Boolean) ?? [],
-  );
-  const [selectedGenerations, setSelectedGenerations] = useState<string[]>(
-    () => searchParams.get("generation")?.split(",").filter(Boolean) ?? [],
-  );
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedGenerations, setSelectedGenerations] = useState<string[]>([]);
+
+  useEffect(() => {
+    setSearchTerm(searchParams.get("search") ?? "");
+    setSelectedTypes(
+      searchParams.get("type")?.split(",").filter(Boolean) ?? [],
+    );
+    setSelectedGenerations(
+      searchParams.get("generation")?.split(",").filter(Boolean) ?? [],
+    );
+    setIsInitialised(true);
+  }, [searchParams]);
 
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
   const [offset, setOffset] = useState(0);
@@ -35,18 +41,21 @@ function HomeContent() {
     setSearchTerm(term);
     setOffset(0);
     setHasMore(true);
+    setPokemons([]);
   }, []);
 
   const handleTypeChange = useCallback((types: string[]) => {
     setSelectedTypes(types);
     setOffset(0);
     setHasMore(true);
+    setPokemons([]);
   }, []);
 
   const handleGenerationChange = useCallback((generations: string[]) => {
     setSelectedGenerations(generations);
     setOffset(0);
     setHasMore(true);
+    setPokemons([]);
   }, []);
 
   const { data, isLoading, isError, isFetching } =
@@ -61,7 +70,7 @@ function HomeContent() {
         offset: offset,
       },
       {
-        enabled: true,
+        enabled: isInitialised,
       },
     );
 
