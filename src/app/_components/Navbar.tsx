@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useTheme } from "next-themes";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, ChevronDown } from "lucide-react";
 
 export default function Navbar() {
   const [langMenuOpen, setLangMenuOpen] = useState(false);
@@ -43,20 +43,9 @@ export default function Navbar() {
             <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">
               {selectedLang}
             </span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
+            <ChevronDown
               className={`h-4 w-4 text-gray-600 transition-transform dark:text-gray-300 ${langMenuOpen ? "rotate-180" : ""}`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
+            />
           </button>
           {langMenuOpen && (
             <div className="absolute right-0 z-10 mt-2 w-28 rounded-md bg-white shadow-lg dark:bg-gray-800">
