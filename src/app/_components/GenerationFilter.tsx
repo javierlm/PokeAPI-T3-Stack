@@ -56,14 +56,16 @@ export function GenerationFilter({
           onClick={onToggle}
         >
           {getButtonText()}
-          <ChevronDown className="-mr-1 ml-2 h-5 w-5" />
+          <ChevronDown
+            className={`-mr-1 ml-2 h-5 w-5 transition-transform ${isOpen ? "rotate-180" : ""}`}
+          />
         </button>
       </div>
 
       {isOpen && (
         <div className="ring-opacity-5 absolute right-0 z-10 mt-2 max-h-60 w-48 origin-top-right overflow-y-auto rounded-md bg-white shadow-lg ring-1 ring-black focus:outline-none">
           <div
-            className="flex flex-col items-center py-1"
+            className="flex flex-col py-1"
             role="menu"
             aria-orientation="vertical"
             aria-labelledby="options-menu"
@@ -74,7 +76,7 @@ export function GenerationFilter({
                 e.preventDefault();
                 handleSelectAll();
               }}
-              className="block px-2 py-2 hover:bg-gray-100"
+              className="block w-full cursor-default px-2 py-2 text-center hover:bg-gray-100"
               role="menuitem"
             >
               <span className="rounded-full border border-white/30 bg-gray-200 px-2 py-1 text-xs font-bold text-gray-800 shadow">
@@ -89,7 +91,7 @@ export function GenerationFilter({
                   e.preventDefault();
                   handleSelect(gen.originalName);
                 }}
-                className={`block px-2 py-2 hover:bg-gray-100 ${selectedGenerations.includes(gen.originalName) ? "bg-blue-100" : ""}`}
+                className={`block w-full cursor-default px-2 py-2 text-center hover:bg-gray-100 ${selectedGenerations.includes(gen.originalName) ? "bg-blue-100" : ""}`}
                 role="menuitem"
               >
                 <span

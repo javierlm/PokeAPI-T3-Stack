@@ -55,7 +55,9 @@ export function TypeFilter({
           onClick={onToggle}
         >
           {displaySelectedTypes}
-          <ChevronDown className="-mr-1 ml-2 h-5 w-5" />
+          <ChevronDown
+            className={`-mr-1 ml-2 h-5 w-5 transition-transform ${isOpen ? "rotate-180" : ""}`}
+          />
         </button>
       </div>
 
