@@ -99,5 +99,7 @@ export const byId = publicProcedure
       cries: pokemon.cries,
       description,
       evolutionChain: evolutionChainData,
+      weight: pokemon.weight,
+      height: pokemon.height,
     };
   });

@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Ruler, Weight } from "lucide-react";
 import { PokemonCries } from "@/app/pokemon/[id]/_components/PokemonCries";
 import { PokemonStats } from "@/app/pokemon/[id]/_components/pokemon-stats";
 import { EvolutionChainDisplay } from "@/app/pokemon/[id]/_components/EvolutionChainDisplay";
@@ -24,7 +24,9 @@ interface PokemonDetailWrapperProps {
       stat: { originalName: string; translatedName: string };
       value: number;
     }>;
-    evolutionChain?: unknown; // Changed to unknown to match API response
+    evolutionChain?: unknown;
+    weight: number;
+    height: number;
   };
   resolvedSearchParams: Record<string, string | string[] | undefined>;
 }
@@ -68,6 +70,20 @@ export function PokemonDetailWrapper({
             latestCry={pokemon.cries?.latest ?? undefined}
             legacyCry={pokemon.cries?.legacy ?? undefined}
           />
+        </div>
+        <div className="mt-4 flex items-center justify-center gap-4 sm:mt-2">
+          <div className="flex items-center gap-1">
+            <Weight className="h-8 w-8" />
+            <span className="text-lg sm:text-base">
+              {(pokemon.weight / 10).toFixed(1)} kg
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Ruler className="h-8 w-8" />
+            <span className="text-lg sm:text-base">
+              {(pokemon.height / 10).toFixed(1)} m
+            </span>
+          </div>
         </div>
         <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:mt-2">
           {pokemon.types.map((type: string | { name: string }, i: number) => {
