@@ -7,7 +7,6 @@ import { ArrowLeft, Ruler, Weight } from "lucide-react";
 import { PokemonCries } from "@/app/pokemon/[id]/_components/PokemonCries";
 import { PokemonStats } from "@/app/pokemon/[id]/_components/pokemon-stats";
 import { EvolutionChainDisplay } from "@/app/pokemon/[id]/_components/EvolutionChainDisplay";
-import { MobileEvolutionTab } from "@/app/_components/MobileEvolutionTab";
 import { typeColors } from "@/lib/constants";
 import { useLoading } from "@/context/LoadingContext";
 
@@ -158,20 +157,11 @@ export function PokemonDetailWrapper({
         {evolutionChainData &&
           Array.isArray(evolutionChainData) &&
           evolutionChainData.length > 1 && (
-            <>
-              <MobileEvolutionTab
-                evolutionChain={evolutionChainData}
-                currentPokemonId={pokemon.id}
-                currentSearchParams={resolvedSearchParams}
-              />
-              <div className="hidden sm:block">
-                <EvolutionChainDisplay
-                  evolutionChain={evolutionChainData}
-                  currentPokemonId={pokemon.id}
-                  currentSearchParams={resolvedSearchParams}
-                />
-              </div>
-            </>
+            <EvolutionChainDisplay
+              evolutionChain={evolutionChainData}
+              currentPokemonId={pokemon.id}
+              currentSearchParams={resolvedSearchParams}
+            />
           )}
       </div>
     </div>
