@@ -3,7 +3,12 @@
 import { EvolutionChainDisplay } from "../pokemon/[id]/_components/EvolutionChainDisplay";
 
 interface MobileEvolutionTabProps {
-  evolutionChain: { id: number; name: string; image: string }[];
+  evolutionChain: {
+    id: number;
+    name: string;
+    translatedName: string;
+    image: string;
+  }[];
   currentPokemonId: number;
   currentSearchParams: Record<string, string | string[] | undefined>;
 }

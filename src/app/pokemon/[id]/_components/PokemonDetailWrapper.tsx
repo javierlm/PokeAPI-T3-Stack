@@ -42,7 +42,12 @@ export function PokemonDetailWrapper({
   }, [stopLoading]);
 
   const evolutionChainData = pokemon.evolutionChain as
-    | Array<{ id: number; name: string; image: string }>
+    | Array<{
+        id: number;
+        name: string;
+        translatedName: string;
+        image: string;
+      }>
     | null
     | undefined;
 

@@ -5,7 +5,12 @@ import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface EvolutionChainDisplayProps {
-  evolutionChain: { id: number; name: string; image: string }[];
+  evolutionChain: {
+    id: number;
+    name: string;
+    translatedName: string;
+    image: string;
+  }[];
   currentPokemonId: number;
   currentSearchParams: Record<string, string | string[] | undefined>;
 }
@@ -44,7 +49,9 @@ export function EvolutionChainDisplay({
               quality={85}
               className="h-24 w-24 object-contain"
             />
-            <span className="mt-2 text-sm font-semibold">{evolution.name}</span>
+            <span className="mt-2 text-sm font-semibold">
+              {evolution.translatedName}
+            </span>
           </div>
         ))}
       </div>
