@@ -29,7 +29,7 @@ export default function RootLayout({
       className={`${geist.variable} h-full`}
       suppressHydrationWarning
     >
-      <body className="bg-background text-foreground h-full">
+      <body className="bg-background text-foreground h-full overflow-hidden">
         <ClientThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -40,9 +40,7 @@ export default function RootLayout({
               <LoadingProvider>
                 <div className="flex h-full flex-col">
                   <Navbar />
-                  <main id="main-scroll" className="flex-grow overflow-y-auto">
-                    {children}
-                  </main>
+                  <main className="flex-grow">{children}</main>
                 </div>
               </LoadingProvider>
             </LanguageProvider>
