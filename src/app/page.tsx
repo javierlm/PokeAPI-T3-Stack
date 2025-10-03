@@ -7,7 +7,7 @@ import PokemonResultCard, {
 } from "./_components/PokemonResultCard";
 import { LoadingPokeball } from "./_components/LoadingPokeball";
 import { useLanguage } from "@/context/LanguageContext";
-import BackToTopButton from "./_components/BackToTopButton";
+import { useScroll } from "@/context/ScrollContext";
 import { ArrowDown, Frown } from "lucide-react";
 import { SearchAndFilterWrapper } from "./_components/SearchAndFilterWrapper";
 import { useSearchParams } from "next/navigation";
@@ -16,6 +16,7 @@ import { useIsMobile } from "./_components/hooks/useIsMobile";
 
 function HomeContent() {
   const { selectedLang } = useLanguage();
+  const { scrollElementRef } = useScroll();
   const searchParams = useSearchParams();
   const [isInitialised, setIsInitialised] = useState(false);
 
@@ -30,14 +31,14 @@ function HomeContent() {
   const isMobile = useIsMobile();
   const columns = isMobile ? 1 : 3;
 
-  const parentRef = useRef<HTMLDivElement | null>(null);
-
   const rowCount = Math.ceil(pokemons.length / columns);
+
+  const ROW_HEIGHT_ESTIMATE = 420; // Estimated height for each row in the virtualized list
 
   const virtualizer = useVirtualizer({
     count: rowCount,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 420,
+    getScrollElement: () => scrollElementRef.current,
+    estimateSize: () => ROW_HEIGHT_ESTIMATE,
     overscan: !isMobile ? 2 : 1,
   });
 
@@ -114,108 +115,97 @@ function HomeContent() {
   };
 
   return (
-    <div className="flex h-screen">
-      <main
-        id="main-scroll"
-        ref={parentRef}
-        className="flex flex-1 flex-col overflow-auto pb-20"
-        data-scroll-root
-      >
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-12">
-          <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-            Poke <span className="text-[hsl(280,100%,70%)]">API</span> App
-          </h1>
+    <div className="pb-4 sm:pb-8">
+      <div className="flex w-full flex-col justify-center gap-12 px-4 py-12">
+        <h1 className="mx-auto w-full text-center text-5xl font-extrabold tracking-tight sm:text-[5rem]">
+          Poke <span className="text-[hsl(280,100%,70%)]">API</span> App
+        </h1>
+      </div>
+      <Suspense fallback={<div>Cargando filtros...</div>}>
+        <div className="w-full">
+          <SearchAndFilterWrapper
+            onSearch={handleSearch}
+            onTypeChange={handleTypeChange}
+            onGenerationChange={handleGenerationChange}
+          />
         </div>
-        <Suspense fallback={<div>Cargando filtros...</div>}>
-          <div className="w-full">
-            <SearchAndFilterWrapper
-              onSearch={handleSearch}
-              onTypeChange={handleTypeChange}
-              onGenerationChange={handleGenerationChange}
-            />
-          </div>
-        </Suspense>
-        <div className="mx-auto mt-8 w-full max-w-7xl px-4">
-          <BackToTopButton />
-          {isFetching && offset === 0 ? (
-            <LoadingPokeball />
-          ) : isError ? (
-            <p className="text-lg text-red-500">Error al cargar los Pokémon.</p>
-          ) : pokemons.length > 0 ? (
-            <div
-              style={{
-                height: `${totalSize}px`,
-                width: "100%",
-                position: "relative",
-              }}
-            >
-              {virtualItems.map((virtualRow) => {
-                const startIndex = virtualRow.index * columns;
-                const endIndex = Math.min(
-                  startIndex + columns,
-                  pokemons.length,
-                );
-                const rowPokemons = pokemons.slice(startIndex, endIndex);
+      </Suspense>
+      <div className="mx-auto mt-8 w-full max-w-7xl px-4">
+        {isFetching && offset === 0 ? (
+          <LoadingPokeball />
+        ) : isError ? (
+          <p className="text-lg text-red-500">Error al cargar los Pokémon.</p>
+        ) : pokemons.length > 0 ? (
+          <div
+            style={{
+              height: `${totalSize}px`,
+              width: "100%",
+              position: "relative",
+            }}
+          >
+            {virtualItems.map((virtualRow) => {
+              const startIndex = virtualRow.index * columns;
+              const endIndex = Math.min(startIndex + columns, pokemons.length);
+              const rowPokemons = pokemons.slice(startIndex, endIndex);
 
-                return (
-                  <div
-                    key={virtualRow.key}
-                    data-index={virtualRow.index}
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      width: "100%",
-                      height: `${virtualRow.size}px`,
-                      transform: `translateY(${virtualRow.start}px)`,
-                      display: "grid",
-                      gridTemplateColumns: `repeat(${columns}, minmax(0,1fr))`,
-                      gap: "1rem",
-                    }}
-                  >
-                    {rowPokemons.map((pokemon) => (
-                      <div
-                        key={pokemon.id}
-                        className="flex w-full justify-center"
-                      >
-                        <PokemonResultCard
-                          pokemon={pokemon}
-                          selectedLang={selectedLang}
-                          currentSearchParams={searchParams}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                );
-              })}
-            </div>
-          ) : data && data.pokemonList.length === 0 ? (
-            <div className="mt-8 flex flex-col items-center justify-center gap-4">
-              <Frown className="text-muted-foreground h-24 w-24" />
-              <p className="text-foreground text-lg">
-                No se encontraron Pokémon.
-              </p>
-            </div>
-          ) : null}
-        </div>
-        <div className="flex w-full justify-center">
-          {hasMore && pokemons.length > 0 && (
-            <button
-              onClick={handleLoadMore}
-              className="mt-12 flex h-[50px] w-[200px] cursor-pointer items-center justify-center gap-2 rounded-full bg-blue-800 px-10 py-3 font-semibold text-white no-underline transition hover:bg-blue-700"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                "Cargando..."
-              ) : (
-                <>
-                  {"Cargar más"} <ArrowDown size={20} />
-                </>
-              )}
-            </button>
-          )}
-        </div>
-      </main>
+              return (
+                <div
+                  key={virtualRow.key}
+                  data-index={virtualRow.index}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: `${virtualRow.size}px`,
+                    transform: `translateY(${virtualRow.start}px)`,
+                    display: "grid",
+                    gridTemplateColumns: `repeat(${columns}, minmax(0,1fr))`,
+                    gap: "1rem",
+                  }}
+                >
+                  {rowPokemons.map((pokemon) => (
+                    <div
+                      key={pokemon.id}
+                      className="flex w-full justify-center"
+                    >
+                      <PokemonResultCard
+                        pokemon={pokemon}
+                        selectedLang={selectedLang}
+                        currentSearchParams={searchParams}
+                      />
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        ) : data && data.pokemonList.length === 0 ? (
+          <div className="mt-8 flex flex-col items-center justify-center gap-4">
+            <Frown className="text-muted-foreground h-24 w-24" />
+            <p className="text-foreground text-lg">
+              No se encontraron Pokémon.
+            </p>
+          </div>
+        ) : null}
+      </div>
+      <div className="flex w-full justify-center">
+        {hasMore && pokemons.length > 0 && (
+          <button
+            onClick={handleLoadMore}
+            className="mt-12 flex h-[50px] w-[200px] cursor-pointer items-center justify-center gap-2 rounded-full bg-blue-800 px-10 py-3 font-semibold text-white no-underline transition hover:bg-blue-700"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              "Cargando..."
+            ) : (
+              <>
+                {"Cargar más"} <ArrowDown size={20} />
+              </>
+            )}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

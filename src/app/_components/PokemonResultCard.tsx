@@ -49,8 +49,8 @@ const PokemonResultCard = React.memo(function PokemonResultCard({
           Generación:{" "}
           <span className="font-normal">{pokemon.generation ?? "?"}</span>
         </span>
-        <span className="mt-2 flex flex-wrap items-center gap-2">
-          <strong className="text-primary mr-2">Tipos:</strong>
+        <div className="mt-2 flex items-center gap-2 overflow-hidden">
+          <strong className="text-primary mr-2 shrink-0">Tipos:</strong>
           {pokemon.types && pokemon.types.length > 0 ? (
             pokemon.types.map((type, i) => {
               const typeName =
@@ -73,7 +73,7 @@ const PokemonResultCard = React.memo(function PokemonResultCard({
           ) : (
             <span className="text-muted-foreground">?</span>
           )}
-        </span>
+        </div>
       </div>
     </Link>
   );

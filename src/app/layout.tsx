@@ -8,6 +8,8 @@ import Navbar from "./_components/Navbar";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { LoadingProvider } from "@/context/LoadingContext";
 import { ClientThemeProvider } from "./_components/ClientThemeProvider";
+import BackToTopButton from "./_components/BackToTopButton";
+import { ScrollProvider } from "@/context/ScrollContext";
 
 export const metadata: Metadata = {
   title: "PokeAPI App",
@@ -29,7 +31,7 @@ export default function RootLayout({
       className={`${geist.variable} h-full`}
       suppressHydrationWarning
     >
-      <body className="bg-background text-foreground h-full overflow-hidden">
+      <body className="bg-background text-foreground h-full">
         <ClientThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -40,7 +42,10 @@ export default function RootLayout({
               <LoadingProvider>
                 <div className="flex h-full flex-col">
                   <Navbar />
-                  <main className="flex-grow">{children}</main>
+                  <ScrollProvider>
+                    {children}
+                    <BackToTopButton />
+                  </ScrollProvider>
                 </div>
               </LoadingProvider>
             </LanguageProvider>
