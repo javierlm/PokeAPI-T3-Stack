@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, Suspense, useRef } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { api } from "@/trpc/react";
 import PokemonResultCard, {
   type Pokemon,
@@ -33,7 +33,7 @@ function HomeContent() {
 
   const rowCount = Math.ceil(pokemons.length / columns);
 
-  const ROW_HEIGHT_ESTIMATE = 420; // Estimated height for each row in the virtualized list
+  const ROW_HEIGHT_ESTIMATE = 420;
 
   const virtualizer = useVirtualizer({
     count: rowCount,
