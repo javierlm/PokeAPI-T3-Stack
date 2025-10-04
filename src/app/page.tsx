@@ -8,7 +8,7 @@ import PokemonResultCard, {
 import { LoadingPokeball } from "./_components/LoadingPokeball";
 import { useLanguage } from "@/context/LanguageContext";
 import { useScroll } from "@/context/ScrollContext";
-import { ArrowDown, Frown } from "lucide-react";
+import { ArrowDown, Frown, RotateCw } from "lucide-react";
 import { SearchAndFilterWrapper } from "./_components/SearchAndFilterWrapper";
 import { useSearchParams } from "next/navigation";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -196,7 +196,9 @@ function HomeContent() {
             disabled={isLoading}
           >
             {isLoading ? (
-              t("loading")
+              <>
+                {t("loading")} <RotateCw size={20} className="animate-spin" />
+              </>
             ) : (
               <>
                 {t("loadMore")} <ArrowDown size={20} />
