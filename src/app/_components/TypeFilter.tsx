@@ -2,6 +2,7 @@ import { ChevronDown } from "lucide-react";
 import { typeColors } from "@/lib/constants";
 import { api } from "@/trpc/react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useTranslations } from "next-intl";
 
 interface TypeFilterProps {
   isOpen: boolean;
@@ -16,9 +17,10 @@ export function TypeFilter({
   selectedTypes,
   onTypeChange,
 }: TypeFilterProps) {
-  const { selectedLang } = useLanguage();
+  const t = useTranslations("TypeFilter");
+  const { locale } = useLanguage();
   const { data: typesData } = api.pokemon.getPokemonTypes.useQuery({
-    language: selectedLang,
+    language: locale,
   });
 
   const handleSelect = (type: string) => {
@@ -44,7 +46,7 @@ export function TypeFilter({
             return typeInfo ? typeInfo.translatedName : type;
           })
           .join(", ")
-      : "Tipo";
+      : t("type");
 
   return (
     <div className="relative inline-block text-left">
@@ -75,7 +77,7 @@ export function TypeFilter({
               role="menuitem"
             >
               <span className="rounded-full border border-white/30 bg-gray-200 px-2 py-1 text-xs font-bold text-gray-800 shadow">
-                Limpiar
+                {t("clear")}
               </span>
             </button>
             {typesData?.map((type) => {

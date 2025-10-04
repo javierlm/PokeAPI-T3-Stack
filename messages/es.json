@@ -1,0 +1,42 @@
+{
+    "HomePage": {
+        "loadingFilters": "Cargando filtros...",
+        "errorLoadingPokemon": "Error al cargar los Pokémon.",
+        "noPokemonFound": "No se encontraron Pokémon.",
+        "loading": "Cargando...",
+        "loadMore": "Cargar más"
+    },
+    "Search": {
+        "placeholder": "Busca un Pokémon..."
+    },
+    "TypeFilter": {
+        "type": "Tipo",
+        "clear": "Limpiar"
+    },
+    "GenerationFilter": {
+        "generation": "Generación",
+        "generations": "{count} Generaciones",
+        "all": "Todas"
+    },
+    "PokemonDetailPage": {
+        "backToList": "Volver a la lista",
+        "generation": "Generación",
+        "weight": "Peso",
+        "height": "Altura",
+        "evolutions": "Evoluciones"
+    },
+    "Loading": {
+        "loadingData": "Cargando datos..."
+    },
+    "PokemonCard": {
+        "generation": "Generación:",
+        "types": "Tipos:"
+    },
+    "Navbar": {
+        "title": "Poketest",
+        "languageSelectorLabel": "Selector de idioma",
+        "spanish": "Español",
+        "english": "Inglés",
+        "toggleThemeLabel": "Cambiar tema"
+    }
+}

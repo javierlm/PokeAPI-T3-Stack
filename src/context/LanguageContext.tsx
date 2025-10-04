@@ -1,42 +1,39 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useCallback } from "react";
 import type { ReactNode } from "react";
 
 interface LanguageContextType {
-  selectedLang: string;
-  setSelectedLang: (lang: string) => void;
+  locale: string;
+  setLocale: (locale: string) => void;
 }
 
-const LanguageContext = createContext<LanguageContextType | undefined>(
-  undefined,
-);
+const LanguageContext = createContext<LanguageContextType>({
+  locale: "es",
+  setLocale: () => {
+    console.warn("setLocale called outside of a LanguageProvider");
+  },
+});
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [selectedLang, setSelectedLang] = useState("es");
+export const LanguageProvider = ({
+  children,
+  initialLocale,
+}: {
+  children: ReactNode;
+  initialLocale: string;
+}) => {
+  const [locale] = useState(initialLocale);
 
-  useEffect(() => {
-    const storedLang = localStorage.getItem("selectedLang");
-    if (storedLang) {
-      setSelectedLang(storedLang);
-    }
+  const setLocale = useCallback((newLocale: string) => {
+    document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000`;
+    window.location.reload();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("selectedLang", selectedLang);
-  }, [selectedLang]);
-
   return (
-    <LanguageContext.Provider value={{ selectedLang, setSelectedLang }}>
+    <LanguageContext.Provider value={{ locale, setLocale }}>
       {children}
     </LanguageContext.Provider>
   );
-}
+};
 
-export function useLanguage() {
-  const context = useContext(LanguageContext);
-  if (context === undefined) {
-    throw new Error("useLanguage must be used within a LanguageProvider");
-  }
-  return context;
-}
+export const useLanguage = () => useContext(LanguageContext);

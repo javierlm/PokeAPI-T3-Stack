@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useDebounce } from "./hooks/useDebounce";
+import { useTranslations } from "next-intl";
 
 interface SearchProps {
   initialSearchTerm: string;
@@ -9,6 +10,7 @@ interface SearchProps {
 }
 
 export function Search({ initialSearchTerm, onSearch }: SearchProps) {
+  const t = useTranslations("Search");
   const [internalSearchTerm, setInternalSearchTerm] =
     useState(initialSearchTerm);
   const debouncedSearch = useDebounce(internalSearchTerm);
@@ -28,7 +30,7 @@ export function Search({ initialSearchTerm, onSearch }: SearchProps) {
       <div className="relative flex items-center">
         <input
           type="search"
-          placeholder="Busca un Pokémon..."
+          placeholder={t("placeholder")}
           className="w-full rounded-full border-2 border-gray-300 bg-white py-3 pr-16 pl-5 text-base text-gray-700 shadow-sm transition-colors focus:border-blue-500 focus:outline-none"
           value={internalSearchTerm}
           onChange={(e) => setInternalSearchTerm(e.target.value)}

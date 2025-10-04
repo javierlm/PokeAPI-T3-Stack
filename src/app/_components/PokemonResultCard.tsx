@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { typeColors } from "@/lib/constants";
 import { useLoading } from "@/context/LoadingContext";
 export type PokemonType = string | { name: string };
@@ -15,21 +16,25 @@ export type Pokemon = {
 
 const PokemonResultCard = React.memo(function PokemonResultCard({
   pokemon,
-  selectedLang,
   currentSearchParams,
 }: {
   pokemon: Pokemon;
-  selectedLang: string;
   currentSearchParams?: URLSearchParams;
 }) {
-  const searchParamsString = currentSearchParams
-    ? currentSearchParams.toString()
-    : "";
+  const t = useTranslations("PokemonCard");
   const { startLoading } = useLoading();
 
-  const detailHref = `/pokemon/${pokemon.id}?lang=${selectedLang}${searchParamsString ? `&${searchParamsString}` : ""}`;
+  const queryForLink = new URLSearchParams(currentSearchParams);
+
   return (
-    <Link href={detailHref} className="block" onClick={startLoading}>
+    <Link
+      href={{
+        pathname: `/pokemon/${pokemon.id}`,
+        query: queryForLink.toString(),
+      }}
+      className="block"
+      onClick={startLoading}
+    >
       <div className="border-border text-foreground flex w-full max-w-md flex-col gap-3 rounded-xl border-2 p-6 shadow-xl transition-transform duration-500 hover:scale-105">
         {pokemon.image && (
           <Image
@@ -46,11 +51,11 @@ const PokemonResultCard = React.memo(function PokemonResultCard({
           #{pokemon.id ?? "?"} {pokemon.name ?? "?"}
         </span>
         <span className="text-muted-foreground text-sm font-semibold">
-          Generación:{" "}
+          {t("generation")}{" "}
           <span className="font-normal">{pokemon.generation ?? "?"}</span>
         </span>
         <div className="mt-2 flex items-center gap-2 overflow-hidden">
-          <strong className="text-primary mr-2 shrink-0">Tipos:</strong>
+          <strong className="text-primary mr-2 shrink-0">{t("types")}</strong>
           {pokemon.types && pokemon.types.length > 0 ? (
             pokemon.types.map((type, i) => {
               const typeName =

@@ -1,15 +1,19 @@
 import "@/styles/globals.css";
 
+import "@/styles/globals.css";
+
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 
 import { TRPCReactProvider } from "@/trpc/react";
 import Navbar from "./_components/Navbar";
-import { LanguageProvider } from "@/context/LanguageContext";
 import { LoadingProvider } from "@/context/LoadingContext";
 import { ClientThemeProvider } from "./_components/ClientThemeProvider";
 import BackToTopButton from "./_components/BackToTopButton";
 import { ScrollProvider } from "@/context/ScrollContext";
+import { getLocaleFromCookie } from "@/lib/locale";
+import { LanguageProvider } from "@/context/LanguageContext";
+import IntlProvider from "./_components/IntlProvider";
 
 export const metadata: Metadata = {
   title: "PokeAPI App",
@@ -20,14 +24,22 @@ export const metadata: Metadata = {
 const geist = Geist({
   subsets: ["latin"],
   variable: "--font-geist-sans",
+  preload: false,
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const locale = await getLocaleFromCookie();
+  const messages = (
+    (await import(`../../messages/${locale}.json`)) as {
+      default: IntlMessages;
+    }
+  ).default;
+
   return (
     <html
-      lang="en"
+      lang={locale}
       className={`${geist.variable} h-full`}
       suppressHydrationWarning
     >
@@ -37,19 +49,21 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem
         >
-          <TRPCReactProvider>
-            <LanguageProvider>
-              <LoadingProvider>
-                <div className="flex h-full flex-col">
-                  <Navbar />
-                  <ScrollProvider>
-                    {children}
-                    <BackToTopButton />
-                  </ScrollProvider>
-                </div>
-              </LoadingProvider>
-            </LanguageProvider>
-          </TRPCReactProvider>
+          <IntlProvider locale={locale} messages={messages}>
+            <TRPCReactProvider>
+              <LanguageProvider initialLocale={locale}>
+                <LoadingProvider>
+                  <div className="flex h-full flex-col">
+                    <Navbar />
+                    <ScrollProvider>
+                      {children}
+                      <BackToTopButton />
+                    </ScrollProvider>
+                  </div>
+                </LoadingProvider>
+              </LanguageProvider>
+            </TRPCReactProvider>
+          </IntlProvider>
         </ClientThemeProvider>
       </body>
     </html>

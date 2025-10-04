@@ -1,6 +1,7 @@
 import { ChevronDown } from "lucide-react";
 import { api } from "@/trpc/react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useTranslations } from "next-intl";
 
 interface GenerationFilterProps {
   isOpen: boolean;
@@ -15,9 +16,10 @@ export function GenerationFilter({
   selectedGenerations,
   onGenerationChange,
 }: GenerationFilterProps) {
-  const { selectedLang } = useLanguage();
+  const t = useTranslations("GenerationFilter");
+  const { locale } = useLanguage();
   const { data: generationsData } = api.pokemon.getPokemonGenerations.useQuery({
-    language: selectedLang,
+    language: locale,
   });
 
   const handleSelect = (genName: string) => {
@@ -36,14 +38,14 @@ export function GenerationFilter({
 
   const getButtonText = () => {
     if (selectedGenerations.length === 0) {
-      return "Generación";
+      return t("generation");
     } else if (selectedGenerations.length === 1) {
       const selectedGen = generationsData?.find(
         (gen) => gen.originalName === selectedGenerations[0],
       );
-      return selectedGen ? selectedGen.translatedName : "Generación";
+      return selectedGen ? selectedGen.translatedName : t("generation");
     } else {
-      return `${selectedGenerations.length} Generaciones`;
+      return t("generations", { count: selectedGenerations.length });
     }
   };
 
@@ -80,7 +82,7 @@ export function GenerationFilter({
               role="menuitem"
             >
               <span className="rounded-full border border-white/30 bg-gray-200 px-2 py-1 text-xs font-bold text-gray-800 shadow">
-                Todas
+                {t("all")}
               </span>
             </a>
             {generationsData?.map((gen) => (

@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Ruler, Weight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { PokemonCries } from "@/app/pokemon/[id]/_components/PokemonCries";
 import { PokemonStats } from "@/app/pokemon/[id]/_components/pokemon-stats";
 import { EvolutionChainDisplay } from "@/app/pokemon/[id]/_components/EvolutionChainDisplay";
@@ -34,6 +35,7 @@ export function PokemonDetailWrapper({
   pokemon,
   resolvedSearchParams,
 }: PokemonDetailWrapperProps) {
+  const t = useTranslations("PokemonDetailPage");
   const { stopLoading } = useLoading();
 
   useEffect(() => {
@@ -57,7 +59,7 @@ export function PokemonDetailWrapper({
         className="inline-flex items-center gap-1 rounded-md bg-blue-800 px-4 py-2 text-white shadow-lg transition-colors hover:bg-blue-700"
       >
         <ArrowLeft className="h-4 w-4" />
-        Volver a la lista
+        {t("backToList")}
       </Link>{" "}
       <div className="mt-4 flex flex-col items-center sm:mt-2">
         <Image
@@ -116,7 +118,7 @@ export function PokemonDetailWrapper({
           })}
         </div>
         <div className="mt-4 text-lg sm:mt-2 sm:text-base">
-          <span className="font-semibold">Generación:</span>{" "}
+          <span className="font-semibold">{t("generation")}:</span>{" "}
           {pokemon.generation}
         </div>
         <div className="mt-4 max-w-md text-center text-base sm:mt-2 sm:text-sm lg:text-lg">

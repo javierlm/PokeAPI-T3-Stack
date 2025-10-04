@@ -3,10 +3,12 @@ import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useTheme } from "next-themes";
 import { Sun, Moon, ChevronDown } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function Navbar() {
+  const t = useTranslations("Navbar");
   const [langMenuOpen, setLangMenuOpen] = useState(false);
-  const { selectedLang, setSelectedLang } = useLanguage();
+  const { locale, setLocale } = useLanguage();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const langSelectorRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false); // New state for client-side rendering
@@ -31,17 +33,17 @@ export default function Navbar() {
   return (
     <nav className="flex items-center justify-between bg-white px-4 py-2 shadow dark:bg-gray-900">
       <span className="text-lg font-bold text-gray-800 dark:text-gray-100">
-        Poketest
+        {t("title")}
       </span>
       <div className="flex items-center gap-4">
         <div className="relative" ref={langSelectorRef}>
           <button
             onClick={() => setLangMenuOpen(!langMenuOpen)}
             className="flex items-center gap-2 rounded p-2 transition-all hover:scale-110 hover:bg-gray-100 dark:hover:bg-gray-700"
-            aria-label="Language selector"
+            aria-label={t("languageSelectorLabel")}
           >
             <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">
-              {selectedLang}
+              {locale}
             </span>
             <ChevronDown
               className={`h-4 w-4 text-gray-600 transition-transform dark:text-gray-300 ${langMenuOpen ? "rotate-180" : ""}`}
@@ -55,12 +57,12 @@ export default function Navbar() {
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
-                      setSelectedLang("es");
+                      setLocale("es");
                       setLangMenuOpen(false);
                     }}
                     className="block px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-blue-500 hover:text-white dark:text-gray-200 dark:hover:bg-blue-500 dark:hover:text-white"
                   >
-                    Español
+                    {t("spanish")}
                   </a>
                 </li>
                 <li>
@@ -68,12 +70,12 @@ export default function Navbar() {
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
-                      setSelectedLang("en");
+                      setLocale("en");
                       setLangMenuOpen(false);
                     }}
                     className="block px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-blue-500 hover:text-white dark:text-gray-200 dark:hover:bg-blue-500 dark:hover:text-white"
                   >
-                    English
+                    {t("english")}
                   </a>
                 </li>
               </ul>
@@ -84,7 +86,7 @@ export default function Navbar() {
         <button
           onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
           className="rounded-full p-2 transition-all hover:scale-110 hover:bg-gray-100 dark:hover:bg-gray-800"
-          aria-label="Toggle theme"
+          aria-label={t("toggleThemeLabel")}
         >
           {mounted ? (
             resolvedTheme === "dark" ? (

@@ -13,9 +13,11 @@ import { SearchAndFilterWrapper } from "./_components/SearchAndFilterWrapper";
 import { useSearchParams } from "next/navigation";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useIsMobile } from "./_components/hooks/useIsMobile";
+import { useTranslations } from "next-intl";
 
 function HomeContent() {
-  const { selectedLang } = useLanguage();
+  const t = useTranslations("HomePage");
+  const { locale } = useLanguage();
   const { scrollElementRef } = useScroll();
   const searchParams = useSearchParams();
   const [isInitialised, setIsInitialised] = useState(false);
@@ -81,7 +83,7 @@ function HomeContent() {
     api.pokemon.pokemonList.useQuery(
       {
         search: searchTerm,
-        language: selectedLang,
+        language: locale,
         types: selectedTypes.length > 0 ? selectedTypes : undefined,
         generation:
           selectedGenerations.length > 0 ? selectedGenerations : undefined,
@@ -121,7 +123,7 @@ function HomeContent() {
           Poke <span className="text-[hsl(280,100%,70%)]">API</span> App
         </h1>
       </div>
-      <Suspense fallback={<div>Cargando filtros...</div>}>
+      <Suspense fallback={<div>{t("loadingFilters")}</div>}>
         <div className="w-full">
           <SearchAndFilterWrapper
             onSearch={handleSearch}
@@ -134,7 +136,7 @@ function HomeContent() {
         {isFetching && offset === 0 ? (
           <LoadingPokeball />
         ) : isError ? (
-          <p className="text-lg text-red-500">Error al cargar los Pokémon.</p>
+          <p className="text-lg text-red-500">{t("errorLoadingPokemon")}</p>
         ) : pokemons.length > 0 ? (
           <div
             style={{
@@ -171,7 +173,6 @@ function HomeContent() {
                     >
                       <PokemonResultCard
                         pokemon={pokemon}
-                        selectedLang={selectedLang}
                         currentSearchParams={searchParams}
                       />
                     </div>
@@ -183,9 +184,7 @@ function HomeContent() {
         ) : data && data.pokemonList.length === 0 ? (
           <div className="mt-8 flex flex-col items-center justify-center gap-4">
             <Frown className="text-muted-foreground h-24 w-24" />
-            <p className="text-foreground text-lg">
-              No se encontraron Pokémon.
-            </p>
+            <p className="text-foreground text-lg">{t("noPokemonFound")}</p>
           </div>
         ) : null}
       </div>
@@ -197,10 +196,10 @@ function HomeContent() {
             disabled={isLoading}
           >
             {isLoading ? (
-              "Cargando..."
+              t("loading")
             ) : (
               <>
-                {"Cargar más"} <ArrowDown size={20} />
+                {t("loadMore")} <ArrowDown size={20} />
               </>
             )}
           </button>
@@ -211,8 +210,9 @@ function HomeContent() {
 }
 
 export default function Home() {
+  const t = useTranslations("HomePage");
   return (
-    <Suspense fallback={<div>Cargando...</div>}>
+    <Suspense fallback={<div>{t("loading")}</div>}>
       <HomeContent />
     </Suspense>
   );

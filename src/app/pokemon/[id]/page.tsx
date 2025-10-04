@@ -1,5 +1,6 @@
 import { api } from "@/trpc/server";
 import { PokemonDetailWrapper } from "./_components/PokemonDetailWrapper";
+import { getLocaleFromCookie } from "@/lib/locale";
 
 export default async function PokemonDetailPage({
   params,
@@ -10,13 +11,12 @@ export default async function PokemonDetailPage({
 }) {
   const { id } = await params;
   const resolvedSearchParams = await searchParams;
-  const lang =
-    typeof resolvedSearchParams.lang === "string"
-      ? resolvedSearchParams.lang
-      : "es";
+
+  const currentLocale = await getLocaleFromCookie();
+
   const pokemon = await api.pokemon.pokemonById({
     id: parseInt(id),
-    language: lang,
+    language: currentLocale,
   });
 
   return (

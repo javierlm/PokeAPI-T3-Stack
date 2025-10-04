@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useLanguage } from "@/context/LanguageContext";
+import { useTranslations } from "next-intl";
 
 interface EvolutionChainDisplayProps {
   evolutionChain: {
@@ -21,19 +21,20 @@ export function EvolutionChainDisplay({
   currentSearchParams,
 }: EvolutionChainDisplayProps) {
   const router = useRouter();
-  const { selectedLang } = useLanguage();
+  const t = useTranslations("PokemonDetailPage");
 
   const handleEvolutionClick = (id: number) => {
     const newSearchParams = new URLSearchParams(
       currentSearchParams as Record<string, string>,
     );
-    newSearchParams.set("lang", selectedLang);
-    router.push(`/pokemon/${id}?${newSearchParams.toString()}`);
+    const queryString = newSearchParams.toString();
+    const newUrl = `/pokemon/${id}${queryString ? `?${queryString}` : ""}`;
+    router.push(newUrl);
   };
 
   return (
     <div className="mt-8 w-full max-w-2xl">
-      <h2 className="mb-4 text-center text-2xl font-bold">Evoluciones</h2>
+      <h2 className="mb-4 text-center text-2xl font-bold">{t("evolutions")}</h2>
       <div className="flex flex-wrap items-center justify-center gap-4">
         {evolutionChain.map((evolution) => (
           <div
