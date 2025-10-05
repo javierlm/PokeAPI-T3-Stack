@@ -186,7 +186,7 @@ export const getCandidatePokemons = async (
     );
     count = allPokemonNamesResponse.count;
   }
-  if (inputTypes) {
+  if (inputTypes && inputTypes.length > 0) {
     const pokemonsByType = (
       await pokedexInstance.getTypeByName(inputTypes)
     ).flatMap((pokemonType) =>

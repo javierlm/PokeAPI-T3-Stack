@@ -1,7 +1,5 @@
 import "@/styles/globals.css";
 
-import "@/styles/globals.css";
-
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 
@@ -9,8 +7,8 @@ import { TRPCReactProvider } from "@/trpc/react";
 import Navbar from "./_components/Navbar";
 import { LoadingProvider } from "@/context/LoadingContext";
 import { ClientThemeProvider } from "./_components/ClientThemeProvider";
-import BackToTopButton from "./_components/BackToTopButton";
 import { ScrollProvider } from "@/context/ScrollContext";
+import BackToTopButton from "./_components/BackToTopButtonWrapper";
 import { getLocaleFromCookie } from "@/lib/locale";
 import { LanguageProvider } from "@/context/LanguageContext";
 import IntlProvider from "./_components/IntlProvider";

@@ -62,21 +62,18 @@ function HomeContent() {
     setSearchTerm(term);
     setOffset(0);
     setHasMore(true);
-    setPokemons([]);
   }, []);
 
   const handleTypeChange = useCallback((types: string[]) => {
     setSelectedTypes(types);
     setOffset(0);
     setHasMore(true);
-    setPokemons([]);
   }, []);
 
   const handleGenerationChange = useCallback((generations: string[]) => {
     setSelectedGenerations(generations);
     setOffset(0);
     setHasMore(true);
-    setPokemons([]);
   }, []);
 
   const { data, isLoading, isError, isFetching } =
@@ -95,17 +92,17 @@ function HomeContent() {
 
   useEffect(() => {
     if (data) {
-      setPokemons((prevPokemons) => {
-        if (offset === 0) {
-          return data.pokemonList.sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
-        } else {
+      if (offset === 0) {
+        setPokemons(data.pokemonList.sort((a, b) => (a.id ?? 0) - (b.id ?? 0)));
+      } else {
+        setPokemons((prevPokemons) => {
           const newPokemonsMap = new Map(prevPokemons.map((p) => [p.id, p]));
           data.pokemonList.forEach((p) => newPokemonsMap.set(p.id, p));
           return Array.from(newPokemonsMap.values()).sort(
             (a, b) => (a.id ?? 0) - (b.id ?? 0),
           );
-        }
-      });
+        });
+      }
       setHasMore(data.hasMore);
     }
   }, [data, offset]);
@@ -189,13 +186,13 @@ function HomeContent() {
         ) : null}
       </div>
       <div className="flex w-full justify-center">
-        {hasMore && pokemons.length > 0 && (
+        {hasMore && pokemons.length > 0 && !(isFetching && offset === 0) && (
           <button
             onClick={handleLoadMore}
             className="mt-12 flex h-[50px] w-[200px] cursor-pointer items-center justify-center gap-2 rounded-full bg-blue-800 px-10 py-3 font-semibold text-white no-underline transition hover:bg-blue-700"
-            disabled={isLoading}
+            disabled={isFetching}
           >
-            {isLoading ? (
+            {isFetching ? (
               <>
                 {t("loading")} <RotateCw size={20} className="animate-spin" />
               </>
