@@ -54,6 +54,7 @@ export const byId = publicProcedure
       generation,
       types,
       image: pokemon.sprites?.front_default ?? "",
+      shinyImage: pokemon.sprites?.front_shiny ?? "",
       cries: pokemon.cries,
       description,
       evolutionChain: evolutionChainData,

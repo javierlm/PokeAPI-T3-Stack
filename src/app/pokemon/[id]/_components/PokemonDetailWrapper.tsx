@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Ruler, Weight } from "lucide-react";
+import { ArrowLeft, Sparkles, Ruler, Weight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PokemonCries } from "@/app/pokemon/[id]/_components/PokemonCries";
 import { PokemonStats } from "@/app/pokemon/[id]/_components/pokemon-stats";
@@ -16,6 +16,7 @@ interface PokemonDetailWrapperProps {
     id: number;
     name: string;
     image: string;
+    shinyImage: string;
     cries?: { latest?: string | null; legacy?: string | null };
     types: Array<string | { name: string }>;
     generation: string;
@@ -37,10 +38,23 @@ export function PokemonDetailWrapper({
 }: PokemonDetailWrapperProps) {
   const t = useTranslations("PokemonDetailPage");
   const { stopLoading } = useLoading();
+  const [isShiny, setIsShiny] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
 
   useEffect(() => {
     stopLoading();
   }, [stopLoading]);
+
+  const handleShinyToggle = () => {
+    if (isToggling) {
+      return;
+    }
+    setIsToggling(true);
+    setIsShiny((prev) => !prev);
+    setTimeout(() => {
+      setIsToggling(false);
+    }, 50);
+  };
 
   const evolutionChainData = pokemon.evolutionChain as
     | Array<{
@@ -62,14 +76,41 @@ export function PokemonDetailWrapper({
         {t("backToList")}
       </Link>{" "}
       <div className="mt-4 flex flex-col items-center sm:mt-2">
-        <Image
-          src={pokemon.image}
-          alt={pokemon.name}
-          width={256}
-          height={256}
-          quality={85}
-          className="h-64 w-64 object-contain sm:h-48 sm:w-48"
-        />
+        <div className="relative h-64 w-64 sm:h-48 sm:w-48">
+          {isShiny ? (
+            <Image
+              src={pokemon.shinyImage}
+              alt={`Shiny ${pokemon.name}`}
+              width={256}
+              height={256}
+              quality={85}
+              className="h-full w-full object-contain"
+            />
+          ) : (
+            <Image
+              src={pokemon.image}
+              alt={pokemon.name}
+              width={256}
+              height={256}
+              quality={85}
+              priority={true}
+              className="h-full w-full object-contain"
+            />
+          )}
+        </div>
+        {pokemon.shinyImage && (
+          <button
+            onClick={handleShinyToggle}
+            disabled={isToggling}
+            className={`mx-auto mt-2 rounded-full p-2 shadow-md transition-colors ${
+              isShiny ? "bg-yellow-400 text-black" : "bg-gray-700 text-white"
+            } disabled:opacity-50`}
+            aria-label={isShiny ? t("showNormal") : t("showShiny")}
+            title={isShiny ? t("showNormal") : t("showShiny")}
+          >
+            <Sparkles className="h-5 w-5" />
+          </button>
+        )}
         <div className="mt-4 flex items-center gap-2 sm:mt-2">
           <h1 className="text-4xl font-bold sm:text-3xl">{pokemon.name}</h1>
           <PokemonCries

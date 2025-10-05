@@ -18,7 +18,13 @@ export const extractEvolutionDetails = async (
   chainLink: EvolutionChainLink,
   lang: string,
 ): Promise<
-  { id: number; name: string; translatedName: string; image: string }[]
+  {
+    id: number;
+    name: string;
+    translatedName: string;
+    image: string;
+    shinyImage: string;
+  }[]
 > => {
   const pokemonName = chainLink.species.name;
   const pokemonData = await pokedexInstance.getPokemonByName(pokemonName);
@@ -30,10 +36,17 @@ export const extractEvolutionDetails = async (
     lang,
   );
   const imageUrl = pokemonData.sprites?.front_default ?? "";
+  const shinyImageUrl = pokemonData.sprites?.front_shiny ?? "";
   const pokemonId = pokemonData.id;
 
   const details = [
-    { id: pokemonId, name: pokemonName, translatedName, image: imageUrl },
+    {
+      id: pokemonId,
+      name: pokemonName,
+      translatedName,
+      image: imageUrl,
+      shinyImage: shinyImageUrl,
+    },
   ];
 
   const evolutionDetails = await Promise.all(
