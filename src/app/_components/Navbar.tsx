@@ -49,38 +49,42 @@ export default function Navbar() {
               className={`h-4 w-4 text-gray-600 transition-transform dark:text-gray-300 ${langMenuOpen ? "rotate-180" : ""}`}
             />
           </button>
-          {langMenuOpen && (
-            <div className="absolute right-0 z-10 mt-2 w-28 rounded-md bg-white shadow-lg dark:bg-gray-800">
-              <ul className="py-1">
-                <li>
-                  <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setLocale("es");
-                      setLangMenuOpen(false);
-                    }}
-                    className="block px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-blue-500 hover:text-white dark:text-gray-200 dark:hover:bg-blue-500 dark:hover:text-white"
-                  >
-                    {t("spanish")}
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setLocale("en");
-                      setLangMenuOpen(false);
-                    }}
-                    className="block px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-blue-500 hover:text-white dark:text-gray-200 dark:hover:bg-blue-500 dark:hover:text-white"
-                  >
-                    {t("english")}
-                  </a>
-                </li>
-              </ul>
-            </div>
-          )}
+          <div
+            className={`absolute right-0 z-10 mt-2 w-28 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800 transition-all duration-300 ease-in-out ${
+              langMenuOpen
+                ? "transform opacity-100 scale-100"
+                : "transform opacity-0 scale-95 pointer-events-none"
+            }`}
+          >
+            <ul className="py-1">
+              <li>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setLocale("es");
+                    setLangMenuOpen(false);
+                  }}
+                  className="block px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-blue-500 hover:text-white dark:text-gray-200 dark:hover:bg-blue-500 dark:hover:text-white"
+                >
+                  {t("spanish")}
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setLocale("en");
+                    setLangMenuOpen(false);
+                  }}
+                  className="block px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-blue-500 hover:text-white dark:text-gray-200 dark:hover:bg-blue-500 dark:hover:text-white"
+                >
+                  {t("english")}
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <button

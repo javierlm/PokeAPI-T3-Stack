@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useDebounce } from "./hooks/useDebounce";
 import { useTranslations } from "next-intl";
+import { X } from "lucide-react";
 
 interface SearchProps {
   initialSearchTerm: string;
@@ -31,10 +32,20 @@ export function Search({ initialSearchTerm, onSearch }: SearchProps) {
         <input
           type="search"
           placeholder={t("placeholder")}
-          className="w-full rounded-full border-2 border-gray-300 bg-white py-3 pr-16 pl-5 text-base text-gray-700 shadow-sm transition-colors focus:border-blue-500 focus:outline-none"
+          className="w-full rounded-full border-2 border-gray-300 bg-white py-3 pr-28 pl-5 text-base text-gray-700 shadow-sm transition-colors focus:border-blue-500 focus:outline-none"
           value={internalSearchTerm}
           onChange={(e) => setInternalSearchTerm(e.target.value)}
         />
+        {internalSearchTerm && (
+          <button
+            type="button"
+            onClick={() => setInternalSearchTerm("")}
+            className="absolute inset-y-0 right-12 flex items-center justify-center rounded-full bg-transparent px-2 text-gray-400 transition-colors hover:text-red-500 focus:outline-none"
+            aria-label={t("clearSearch")}
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
         <button
           type="submit"
           className="absolute inset-y-0 right-0 flex items-center justify-center rounded-r-full bg-transparent px-4 text-gray-400 transition-colors hover:text-gray-600 focus:outline-none"
