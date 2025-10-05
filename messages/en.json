@@ -7,7 +7,8 @@
         "loadMore": "Load more"
     },
     "Search": {
-        "placeholder": "Search for a Pokémon..."
+        "placeholder": "Search for a Pokémon...",
+        "clearSearch": "Clear search"
     },
     "TypeFilter": {
         "type": "Type",
@@ -23,7 +24,9 @@
         "generation": "Generation",
         "weight": "Weight",
         "height": "Height",
-        "evolutions": "Evolutions"
+        "evolutions": "Evolutions",
+        "showNormal": "Show normal form",
+        "showShiny": "Show shiny form"
     },
     "Loading": {
         "loadingData": "Loading data..."
