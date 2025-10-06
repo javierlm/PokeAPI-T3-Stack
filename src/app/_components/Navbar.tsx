@@ -41,7 +41,7 @@ export default function Navbar() {
         <div className="relative" ref={langSelectorRef}>
           <button
             onClick={() => setLangMenuOpen(!langMenuOpen)}
-            className="flex items-center gap-2 rounded p-2 transition-all hover:scale-110 hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="flex items-center gap-2 rounded-full p-2 transition-all hover:scale-110 hover:bg-gray-100 dark:hover:bg-gray-700"
             aria-label={t("languageSelectorLabel")}
           >
             <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">
