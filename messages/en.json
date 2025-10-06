@@ -40,6 +40,7 @@
         "languageSelectorLabel": "Language selector",
         "spanish": "Spanish",
         "english": "English",
-        "toggleThemeLabel": "Toggle theme"
+        "toggleThemeLabel": "Toggle theme",
+        "toggleUnitSystem": "Toggle unit system"
     }
 }

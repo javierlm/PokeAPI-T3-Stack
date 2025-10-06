@@ -40,6 +40,7 @@
         "languageSelectorLabel": "Selector de idioma",
         "spanish": "Español",
         "english": "Inglés",
-        "toggleThemeLabel": "Cambiar tema"
+        "toggleThemeLabel": "Cambiar tema",
+        "toggleUnitSystem": "Cambiar sistema de unidades"
     }
 }

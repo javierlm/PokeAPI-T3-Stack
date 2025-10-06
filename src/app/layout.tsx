@@ -12,6 +12,7 @@ import BackToTopButton from "./_components/BackToTopButtonWrapper";
 import { getLocaleFromCookie } from "@/lib/locale";
 import { LanguageProvider } from "@/context/LanguageContext";
 import IntlProvider from "./_components/IntlProvider";
+import { UnitProvider } from "@/context/UnitContext";
 
 export const metadata: Metadata = {
   title: "PokeAPI App",
@@ -50,15 +51,17 @@ export default async function RootLayout({
           <IntlProvider locale={locale} messages={messages}>
             <TRPCReactProvider>
               <LanguageProvider initialLocale={locale}>
-                <LoadingProvider>
-                  <div className="flex h-full flex-col">
-                    <Navbar />
-                    <ScrollProvider>
-                      {children}
-                      <BackToTopButton />
-                    </ScrollProvider>
-                  </div>
-                </LoadingProvider>
+                <UnitProvider>
+                  <LoadingProvider>
+                    <div className="flex h-full flex-col">
+                      <Navbar />
+                      <ScrollProvider>
+                        {children}
+                        <BackToTopButton />
+                      </ScrollProvider>
+                    </div>
+                  </LoadingProvider>
+                </UnitProvider>
               </LanguageProvider>
             </TRPCReactProvider>
           </IntlProvider>

@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Sparkles, Ruler, Weight } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useUnit } from "@/context/UnitContext";
+import { convertHeight, convertWeight } from "@/lib/unitConverter";
 import { PokemonCries } from "@/app/pokemon/[id]/_components/PokemonCries";
 import { PokemonStats } from "@/app/pokemon/[id]/_components/pokemon-stats";
 import { EvolutionChainDisplay } from "@/app/pokemon/[id]/_components/EvolutionChainDisplay";
@@ -37,6 +39,7 @@ export function PokemonDetailWrapper({
   resolvedSearchParams,
 }: PokemonDetailWrapperProps) {
   const t = useTranslations("PokemonDetailPage");
+  const { unit } = useUnit();
   const { stopLoading } = useLoading();
   const [isShiny, setIsShiny] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
@@ -122,13 +125,13 @@ export function PokemonDetailWrapper({
           <div className="flex items-center gap-1">
             <Weight className="h-8 w-8" />
             <span className="text-lg sm:text-base">
-              {(pokemon.weight / 10).toFixed(1)} kg
+              {convertWeight(pokemon.weight, unit)}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <Ruler className="h-8 w-8" />
             <span className="text-lg sm:text-base">
-              {(pokemon.height / 10).toFixed(1)} m
+              {convertHeight(pokemon.height, unit)}
             </span>
           </div>
         </div>

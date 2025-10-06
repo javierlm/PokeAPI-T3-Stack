@@ -2,7 +2,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useTheme } from "next-themes";
-import { Sun, Moon, ChevronDown } from "lucide-react";
+import { useUnit } from "@/context/UnitContext";
+import { Sun, Moon, ChevronDown, Scale } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export default function Navbar() {
@@ -10,8 +11,9 @@ export default function Navbar() {
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const { locale, setLocale } = useLanguage();
   const { theme, setTheme, resolvedTheme } = useTheme();
+  const { unit, toggleUnit } = useUnit();
   const langSelectorRef = useRef<HTMLDivElement>(null);
-  const [mounted, setMounted] = useState(false); // New state for client-side rendering
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -50,10 +52,10 @@ export default function Navbar() {
             />
           </button>
           <div
-            className={`absolute right-0 z-10 mt-2 w-28 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800 transition-all duration-300 ease-in-out ${
+            className={`ring-opacity-5 absolute right-0 z-10 mt-2 w-28 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black transition-all duration-300 ease-in-out focus:outline-none dark:bg-gray-800 ${
               langMenuOpen
-                ? "transform opacity-100 scale-100"
-                : "transform opacity-0 scale-95 pointer-events-none"
+                ? "scale-100 transform opacity-100"
+                : "pointer-events-none scale-95 transform opacity-0"
             }`}
           >
             <ul className="py-1">
@@ -86,7 +88,16 @@ export default function Navbar() {
             </ul>
           </div>
         </div>
-
+        <button
+          onClick={toggleUnit}
+          className="flex items-center gap-2 rounded-full p-2 transition-all hover:scale-110 hover:bg-gray-100 dark:hover:bg-gray-800"
+          aria-label={t("toggleUnitSystem")}
+        >
+          <Scale className="h-5 w-5 text-gray-800 dark:text-gray-100" />
+          <span className="w-12 text-sm font-semibold text-gray-800 dark:text-gray-100">
+            {unit === "si" ? "m/kg" : "ft/lbs"}
+          </span>
+        </button>
         <button
           onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
           className="rounded-full p-2 transition-all hover:scale-110 hover:bg-gray-100 dark:hover:bg-gray-800"
