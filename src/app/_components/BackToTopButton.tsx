@@ -3,24 +3,25 @@
 import { ArrowUp } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { usePathname } from "next/navigation";
+import { useScroll } from "@/context/ScrollContext";
 
 const BackToTopButton = () => {
   const [isVisible, setIsVisible] = useState(false);
   const pathname = usePathname();
+  const { scrollElementRef } = useScroll();
 
   const scrollToTop = useCallback(() => {
-    const mainScroll = document.getElementById("main-scroll");
-    if (mainScroll) {
-      mainScroll.scrollTo({
+    if (scrollElementRef.current) {
+      scrollElementRef.current.scrollTo({
         top: 0,
         behavior: "smooth",
       });
     }
-  }, []);
+  }, [scrollElementRef]);
 
   useEffect(() => {
     const target = document.querySelector("h1");
-    if (!target) {
+    if (!target || !scrollElementRef.current) {
       setIsVisible(false);
       return;
     }
@@ -30,7 +31,7 @@ const BackToTopButton = () => {
         setIsVisible(!entries[0]?.isIntersecting);
       },
       {
-        root: document.getElementById("main-scroll"),
+        root: scrollElementRef.current,
         threshold: 0,
       },
     );
@@ -40,7 +41,7 @@ const BackToTopButton = () => {
     return () => {
       observer.unobserve(target);
     };
-  }, [pathname]);
+  }, [pathname, scrollElementRef]);
 
   return (
     <button
