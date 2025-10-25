@@ -50,7 +50,11 @@ export function EvolutionChainDisplay({
               quality={85}
               className="h-24 w-24 object-contain"
             />
-            <span className="mt-2 text-sm font-semibold">
+            <span
+              className={`mt-2 text-sm font-semibold ${
+                evolution.id === currentPokemonId ? "text-white" : ""
+              }`}
+            >
               {evolution.translatedName}
             </span>
           </div>

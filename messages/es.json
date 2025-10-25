@@ -42,5 +42,11 @@
         "english": "Inglés",
         "toggleThemeLabel": "Cambiar tema",
         "toggleUnitSystem": "Cambiar sistema de unidades"
+    },
+    "PokemonOfTheDay": {
+        "title": "Pokémon del Día",
+        "viewDetails": "Ver detalles",
+        "errorLoading": "Error al cargar el Pokémon del día",
+        "generationText": "Pokémon de"
     }
 }

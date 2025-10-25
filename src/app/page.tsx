@@ -14,6 +14,7 @@ import { useSearchParams } from "next/navigation";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useIsMobile } from "./_components/hooks/useIsMobile";
 import { useTranslations } from "next-intl";
+import PokemonOfTheDayWrapper from "./_components/PokemonOfTheDayWrapper";
 
 function HomeContent() {
   const t = useTranslations("HomePage");
@@ -119,6 +120,9 @@ function HomeContent() {
         <h1 className="mx-auto w-full text-center text-5xl font-extrabold tracking-tight sm:text-[5rem]">
           Poke <span className="text-[hsl(280,100%,70%)]">API</span> App
         </h1>
+      </div>
+      <div className="mx-auto w-full max-w-4xl px-4">
+        <PokemonOfTheDayWrapper />
       </div>
       <Suspense fallback={<div>{t("loadingFilters")}</div>}>
         <div className="w-full">
