@@ -6,7 +6,7 @@ export default getRequestConfig(async () => {
 
   return {
     locale,
-    timeZone: "Etc/UTC",
+    timeZone: "Etc/UTC", // Keep a default for server-side rendering if needed, but client will override
     messages: (
       (await import(`../messages/${locale}.json`)) as { default: IntlMessages }
     ).default,
