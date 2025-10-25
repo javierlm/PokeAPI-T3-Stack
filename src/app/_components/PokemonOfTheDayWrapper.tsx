@@ -5,9 +5,10 @@ import PokemonOfTheDay from "./PokemonOfTheDay";
 import ErrorBoundary from "./ErrorBoundary";
 import { useLanguage } from "@/context/LanguageContext";
 import { useTranslations } from "next-intl";
+import { Temporal } from "@js-temporal/polyfill";
 
 export default function PokemonOfTheDayWrapper() {
-  const [clientDate] = useState<string>(new Date().toISOString());
+  const [clientDate] = useState<string>(Temporal.Now.plainDateISO().toString());
   const { locale } = useLanguage();
 
   const t = useTranslations("PokemonOfTheDay");

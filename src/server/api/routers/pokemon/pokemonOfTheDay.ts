@@ -4,6 +4,7 @@ import pokedexInstance from "@/server/pokedex";
 import { getPokemonOfTheDay } from "@/lib/mulberry32";
 import { getEnrichedPokemonData } from "../pokemonUtils";
 import type PokeAPI from "pokedex-promise-v2";
+import { Temporal } from "@js-temporal/polyfill";
 
 export const pokemonOfTheDay = publicProcedure
   .input(
@@ -14,7 +15,7 @@ export const pokemonOfTheDay = publicProcedure
   )
   .query(async ({ input }) => {
     const lang = input.language ?? "es";
-    const date = new Date(input.date);
+    const date = Temporal.PlainDate.from(input.date);
 
     const pokemonSpecies = await pokedexInstance.getPokemonSpeciesList({
       limit: 1,

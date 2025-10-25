@@ -1,3 +1,5 @@
+import type { Temporal } from "@js-temporal/polyfill";
+
 /**
  * Generates a pseudorandom number between 0 and 1
  * using un mulberry32.
@@ -36,10 +38,10 @@ function nextInt(seed: number, min: number, max: number): number {
  * @param date - Date received
  * @returns Integer based on the date to use as seed
  */
-export function generateDateSeed(date: Date): number {
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1; // JS uses 0 for January, so we need sum 1 for having the number in the range of 1-12
-  const day = date.getDate();
+export function generateDateSeed(date: Temporal.PlainDate): number {
+  const year = date.year;
+  const month = date.month;
+  const day = date.day;
   return year * 10000 + month * 100 + day;
 }
 
@@ -50,7 +52,7 @@ export function generateDateSeed(date: Date): number {
  * @returns ID of the Pokemon of the day
  */
 export function getPokemonOfTheDay(
-  date: Date,
+  date: Temporal.PlainDate,
   totalPokemonCount: number,
 ): number {
   const seed = generateDateSeed(date);
