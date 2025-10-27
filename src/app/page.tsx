@@ -27,12 +27,31 @@ function HomeContent() {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedGenerations, setSelectedGenerations] = useState<string[]>([]);
 
-  const [pokemons, setPokemons] = useState<Pokemon[]>([]);
-  const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
   const limit = 30;
   const isMobile = useIsMobile();
   const columns = isMobile ? 1 : 3;
+
+  const { data, status, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    api.pokemon.pokemonList.useInfiniteQuery(
+      {
+        search: searchTerm,
+        language: locale,
+        types: selectedTypes.length > 0 ? selectedTypes : undefined,
+        generation:
+          selectedGenerations.length > 0 ? selectedGenerations : undefined,
+        limit,
+      },
+      {
+        enabled: isInitialised,
+        getNextPageParam: (lastPage: { nextCursor?: number }) =>
+          lastPage.nextCursor,
+      },
+    );
+
+  const pokemons =
+    data?.pages.flatMap(
+      (page: { pokemonList: Pokemon[] }) => page.pokemonList,
+    ) ?? [];
 
   const rowCount = Math.ceil(pokemons.length / columns);
 
@@ -49,6 +68,25 @@ function HomeContent() {
   const totalSize = virtualizer.getTotalSize();
 
   useEffect(() => {
+    const lastItem = virtualItems[virtualItems.length - 1];
+    if (
+      lastItem &&
+      lastItem.index >= rowCount - 3 &&
+      hasNextPage &&
+      !isFetchingNextPage
+    ) {
+      void fetchNextPage();
+    }
+  }, [
+    virtualItems,
+    pokemons.length,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    rowCount,
+  ]);
+
+  useEffect(() => {
     setSearchTerm(searchParams.get("search") ?? "");
     setSelectedTypes(
       searchParams.get("type")?.split(",").filter(Boolean) ?? [],
@@ -61,58 +99,15 @@ function HomeContent() {
 
   const handleSearch = useCallback((term: string) => {
     setSearchTerm(term);
-    setOffset(0);
-    setHasMore(true);
   }, []);
 
   const handleTypeChange = useCallback((types: string[]) => {
     setSelectedTypes(types);
-    setOffset(0);
-    setHasMore(true);
   }, []);
 
   const handleGenerationChange = useCallback((generations: string[]) => {
     setSelectedGenerations(generations);
-    setOffset(0);
-    setHasMore(true);
   }, []);
-
-  const { data, isLoading, isError, isFetching } =
-    api.pokemon.pokemonList.useQuery(
-      {
-        search: searchTerm,
-        language: locale,
-        types: selectedTypes.length > 0 ? selectedTypes : undefined,
-        generation:
-          selectedGenerations.length > 0 ? selectedGenerations : undefined,
-        limit,
-        offset,
-      },
-      { enabled: isInitialised },
-    );
-
-  useEffect(() => {
-    if (data) {
-      if (offset === 0) {
-        setPokemons(data.pokemonList.sort((a, b) => (a.id ?? 0) - (b.id ?? 0)));
-      } else {
-        setPokemons((prevPokemons) => {
-          const newPokemonsMap = new Map(prevPokemons.map((p) => [p.id, p]));
-          data.pokemonList.forEach((p) => newPokemonsMap.set(p.id, p));
-          return Array.from(newPokemonsMap.values()).sort(
-            (a, b) => (a.id ?? 0) - (b.id ?? 0),
-          );
-        });
-      }
-      setHasMore(data.hasMore);
-    }
-  }, [data, offset]);
-
-  const handleLoadMore = () => {
-    if (!isLoading && hasMore) {
-      setOffset((prevOffset) => prevOffset + limit);
-    }
-  };
 
   return (
     <div className="pb-4 sm:pb-8">
@@ -134,9 +129,9 @@ function HomeContent() {
         </div>
       </Suspense>
       <div className="mx-auto mt-8 w-full max-w-7xl px-4">
-        {isFetching && offset === 0 ? (
+        {status === "pending" ? (
           <LoadingPokeball />
-        ) : isError ? (
+        ) : status === "error" ? (
           <p className="text-lg text-red-500">{t("errorLoadingPokemon")}</p>
         ) : pokemons.length > 0 ? (
           <div
@@ -182,32 +177,18 @@ function HomeContent() {
               );
             })}
           </div>
-        ) : data && data.pokemonList.length === 0 ? (
+        ) : status === "success" && pokemons.length === 0 ? (
           <div className="mt-8 flex flex-col items-center justify-center gap-4">
             <Frown className="text-muted-foreground h-24 w-24" />
             <p className="text-foreground text-lg">{t("noPokemonFound")}</p>
           </div>
         ) : null}
       </div>
-      <div className="flex w-full justify-center">
-        {hasMore && pokemons.length > 0 && !(isFetching && offset === 0) && (
-          <button
-            onClick={handleLoadMore}
-            className="mt-12 flex h-[50px] w-[200px] cursor-pointer items-center justify-center gap-2 rounded-full bg-blue-800 px-10 py-3 font-semibold text-white no-underline transition hover:bg-blue-700"
-            disabled={isFetching}
-          >
-            {isFetching ? (
-              <>
-                {t("loading")} <RotateCw size={20} className="animate-spin" />
-              </>
-            ) : (
-              <>
-                {t("loadMore")} <ArrowDown size={20} />
-              </>
-            )}
-          </button>
-        )}
-      </div>
+      {isFetchingNextPage && (
+        <div className="flex w-full justify-center py-4">
+          <LoadingPokeball />
+        </div>
+      )}
     </div>
   );
 }

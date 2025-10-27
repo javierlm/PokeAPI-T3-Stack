@@ -8,12 +8,12 @@ export const statColor: Record<string, string> = {
 };
 
 export const statDisplayName: Record<string, string> = {
-    hp: "HP",
-    attack: "Ataque",
-    defense: "Defensa",
-    "special-attack": "Ataque Especial",
-    "special-defense": "Defensa Especial",
-    speed: "Velocidad",
+  hp: "HP",
+  attack: "Ataque",
+  defense: "Defensa",
+  "special-attack": "Ataque Especial",
+  "special-defense": "Defensa Especial",
+  speed: "Velocidad",
 };
 
 export const typeColors: Record<string, string> = {
@@ -21,15 +21,17 @@ export const typeColors: Record<string, string> = {
   fire: "bg-red-400 text-white dark:bg-red-700 dark:text-white",
   water: "bg-blue-400 text-white dark:bg-blue-700 dark:text-white",
   grass: "bg-green-400 text-white dark:bg-green-700 dark:text-white",
-  electric: "bg-yellow-300 text-yellow-900 dark:bg-yellow-500 dark:text-yellow-900",
+  electric:
+    "bg-yellow-300 text-yellow-900 dark:bg-yellow-500 dark:text-yellow-900",
   ice: "bg-cyan-200 text-cyan-900 dark:bg-cyan-500 dark:text-cyan-900",
   fighting: "bg-orange-500 text-white dark:bg-orange-700 dark:text-white",
   poison: "bg-purple-400 text-white dark:bg-purple-700 dark:text-white",
   ground: "bg-yellow-700 text-white dark:bg-yellow-900 dark:text-white",
-  flying: "bg-indigo-200 text-indigo-900 dark:bg-indigo-500 dark:text-indigo-100",
+  flying:
+    "bg-indigo-200 text-indigo-900 dark:bg-indigo-500 dark:text-indigo-100",
   psychic: "bg-pink-400 text-white dark:bg-pink-700 dark:text-white",
   bug: "bg-lime-400 text-lime-900 dark:bg-lime-700 dark:text-lime-100",
-  rock: "bg-yellow-800 text-white dark:bg-yellow-900 dark:text-white",
+  rock: "bg-stone-500 text-white dark:bg-stone-700 dark:text-white",
   ghost: "bg-violet-700 text-white dark:bg-violet-900 dark:text-white",
   dragon: "bg-indigo-600 text-white dark:bg-indigo-900 dark:text-white",
   dark: "bg-gray-800 text-white dark:bg-gray-900 dark:text-white",
@@ -38,15 +40,17 @@ export const typeColors: Record<string, string> = {
   fuego: "bg-red-400 text-white dark:bg-red-700 dark:text-white",
   agua: "bg-blue-400 text-white dark:bg-blue-700 dark:text-white",
   planta: "bg-green-400 text-white dark:bg-green-700 dark:text-white",
-  eléctrico: "bg-yellow-300 text-yellow-900 dark:bg-yellow-500 dark:text-yellow-900",
+  eléctrico:
+    "bg-yellow-300 text-yellow-900 dark:bg-yellow-500 dark:text-yellow-900",
   hielo: "bg-cyan-200 text-cyan-900 dark:bg-cyan-500 dark:text-cyan-900",
   lucha: "bg-orange-500 text-white dark:bg-orange-700 dark:text-white",
   veneno: "bg-purple-400 text-white dark:bg-purple-700 dark:text-white",
   tierra: "bg-yellow-700 text-white dark:bg-yellow-900 dark:text-white",
-  volador: "bg-indigo-200 text-indigo-900 dark:bg-indigo-500 dark:text-indigo-100",
+  volador:
+    "bg-indigo-200 text-indigo-900 dark:bg-indigo-500 dark:text-indigo-100",
   psíquico: "bg-pink-400 text-white dark:bg-pink-700 dark:text-white",
   bicho: "bg-lime-400 text-lime-900 dark:bg-lime-700 dark:text-lime-100",
-  roca: "bg-yellow-800 text-white dark:bg-yellow-900 dark:text-white",
+  roca: "bg-stone-500 text-white dark:bg-stone-700 dark:text-white",
   fantasma: "bg-violet-700 text-white dark:bg-violet-900 dark:text-white",
   dragón: "bg-indigo-600 text-white dark:bg-indigo-900 dark:text-white",
   siniestro: "bg-gray-800 text-white dark:bg-gray-900 dark:text-white",
