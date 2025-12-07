@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as v from "valibot";
 import type Pokedex from "pokedex-promise-v2";
 import { publicProcedure } from "@/server/api/trpc";
 import pokedexInstance from "@/server/pokedex";
@@ -11,13 +11,13 @@ import {
 
 export const list = publicProcedure
   .input(
-    z.object({
-      search: z.string().optional(),
-      language: z.string().optional(),
-      types: z.array(z.string()).optional(),
-      generation: z.array(z.string()).optional(),
-      limit: z.number().min(1).max(100).nullish(),
-      cursor: z.number().nullish(), // <-- "cursor" needs to exist, but can be any type
+    v.object({
+      search: v.optional(v.string()),
+      language: v.optional(v.string()),
+      types: v.optional(v.array(v.string())),
+      generation: v.optional(v.array(v.string())),
+      limit: v.nullish(v.pipe(v.number(), v.minValue(1), v.maxValue(100))),
+      cursor: v.nullish(v.number()), // <-- "cursor" needs to exist, but can be any type
     }),
   )
   .query(async ({ input }) => {

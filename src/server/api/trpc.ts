@@ -9,7 +9,7 @@
 
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
-import { ZodError } from "zod";
+import { ValiError } from "valibot";
 
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
@@ -51,7 +51,16 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
       data: {
         ...shape.data,
         zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
+          error.cause instanceof ValiError
+            ? error.cause.issues.reduce(
+                (acc, issue) => {
+                  const path = issue.path?.join(".") ?? "_root";
+                  acc[path] = [...(acc[path] ?? []), issue.message];
+                  return acc;
+                },
+                {} as Record<string, string[]>,
+              )
+            : null,
       },
     };
   },

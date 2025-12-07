@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as v from "valibot";
 import { publicProcedure } from "@/server/api/trpc";
 import pokedexInstance from "@/server/pokedex";
 import { getPokemonOfTheDay } from "@/lib/mulberry32";
@@ -8,9 +8,9 @@ import { Temporal } from "@js-temporal/polyfill";
 
 export const pokemonOfTheDay = publicProcedure
   .input(
-    z.object({
-      date: z.string(),
-      language: z.string().optional(),
+    v.object({
+      date: v.string(),
+      language: v.optional(v.string()),
     }),
   )
   .query(async ({ input }) => {

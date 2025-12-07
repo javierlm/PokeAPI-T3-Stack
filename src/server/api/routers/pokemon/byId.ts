@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as v from "valibot";
 import type Pokedex from "pokedex-promise-v2";
 import { publicProcedure } from "@/server/api/trpc";
 import pokedexInstance from "@/server/pokedex";
@@ -13,9 +13,9 @@ import {
 
 export const byId = publicProcedure
   .input(
-    z.object({
-      id: z.union([z.number(), z.string()]),
-      language: z.string().optional(),
+    v.object({
+      id: v.union([v.number(), v.string()]),
+      language: v.optional(v.string()),
     }),
   )
   .query(async ({ input }) => {

@@ -1,11 +1,11 @@
-import { z } from "zod";
+import * as v from "valibot";
 import type Pokedex from "pokedex-promise-v2";
 import { publicProcedure } from "@/server/api/trpc";
 import pokedexInstance from "@/server/pokedex";
 import { getTranslatedName } from "../pokemonUtils";
 
 export const types = publicProcedure
-  .input(z.object({ language: z.string().optional() }))
+  .input(v.object({ language: v.optional(v.string()) }))
   .query(async ({ input }) => {
     const lang = input.language ?? "es";
     const allTypes = await pokedexInstance.getTypesList();

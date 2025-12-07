@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as v from "valibot";
 
 import {
   createTRPCRouter,
@@ -8,7 +8,7 @@ import {
 
 export const postRouter = createTRPCRouter({
   hello: publicProcedure
-    .input(z.object({ text: z.string() }))
+    .input(v.object({ text: v.string() }))
     .query(({ input }) => {
       return {
         greeting: `Hello ${input.text}`,
@@ -16,7 +16,7 @@ export const postRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(z.object({ name: z.string().min(1) }))
+    .input(v.object({ name: v.pipe(v.string(), v.minLength(1)) }))
     .mutation(async ({ ctx, input }) => {
       return ctx.db.post.create({
         data: {

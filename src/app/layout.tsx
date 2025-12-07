@@ -1,5 +1,6 @@
 import "@/styles/globals.css";
 
+import { Suspense, type ReactNode } from "react";
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 
@@ -26,9 +27,7 @@ const geist = Geist({
   preload: false,
 });
 
-export default async function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+async function LocaleWrapper({ children }: { children: ReactNode }) {
   const locale = await getLocaleFromCookie();
   const messages = (
     (await import(`../../messages/${locale}.json`)) as {
@@ -37,8 +36,32 @@ export default async function RootLayout({
   ).default;
 
   return (
+    <IntlProvider locale={locale} messages={messages}>
+      <TRPCReactProvider>
+        <LanguageProvider initialLocale={locale}>
+          <UnitProvider>
+            <LoadingProvider>
+              <div className="flex h-full flex-col">
+                <Navbar />
+                <ScrollProvider>
+                  {children}
+                  <BackToTopButton />
+                </ScrollProvider>
+              </div>
+            </LoadingProvider>
+          </UnitProvider>
+        </LanguageProvider>
+      </TRPCReactProvider>
+    </IntlProvider>
+  );
+}
+
+export default async function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  return (
     <html
-      lang={locale}
+      lang="en" // Default language, will be updated by LocaleWrapper
       className={`${geist.variable} h-full`}
       suppressHydrationWarning
     >
@@ -48,23 +71,9 @@ export default async function RootLayout({
           defaultTheme="system"
           enableSystem
         >
-          <IntlProvider locale={locale} messages={messages}>
-            <TRPCReactProvider>
-              <LanguageProvider initialLocale={locale}>
-                <UnitProvider>
-                  <LoadingProvider>
-                    <div className="flex h-full flex-col">
-                      <Navbar />
-                      <ScrollProvider>
-                        {children}
-                        <BackToTopButton />
-                      </ScrollProvider>
-                    </div>
-                  </LoadingProvider>
-                </UnitProvider>
-              </LanguageProvider>
-            </TRPCReactProvider>
-          </IntlProvider>
+          <Suspense fallback={<div>Loading...</div>}>
+            <LocaleWrapper>{children}</LocaleWrapper>
+          </Suspense>
         </ClientThemeProvider>
       </body>
     </html>

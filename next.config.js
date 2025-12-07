@@ -11,6 +11,11 @@ const withNextIntl = createNextIntlPlugin("./src/i18n.ts");
 const config = {
   // Only use standalone output for Docker builds
   ...(process.env.DOCKER_BUILD === 'true' && { output: 'standalone' }),
+  cacheComponents: true,
+  reactCompiler: true,
+  experimental: {
+    turbopackFileSystemCacheForDev: true,
+  },
   images: {
     remotePatterns: [
       {
